@@ -1,62 +1,63 @@
-# Implementation Plan: seguinot-io Portfolio Website
+# Implementation Plan: Portfolio Website
 
 **Branch**: `001-portfolio-site` | **Date**: 2025-12-03 | **Spec**: [spec.md](./spec.md)
 **Input**: Feature specification from `/specs/001-portfolio-site/spec.md`
 
+**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
+
 ## Summary
 
-Build a Senior Frontend Developer portfolio website (seguinot-io) showcasing 12 projects with 28 screenshots, featuring an interactive experience timeline, tech stack grid (bento-box style), project case studies, and dark/light mode toggle. Content sourced from static JSON data files. Built with TanStack Start, React 19, Tailwind CSS v4, shadcn/ui, and Framer Motion for whimsical animations.
+Build a professional portfolio website for Christophe Seguinot showcasing 12+ years of experience as a Senior Frontend Developer. The site will demonstrate high-end engineering skills through a React 19/TypeScript/TanStack Start application with static CV data, project screenshots, interactive timeline, tech stack grid, and dark/light mode toggle. **Resume data will be typed strictly with Zod schemas to demonstrate type safety, even for a static portfolio.**
 
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x, React 19, Node.js 20+
-**Framework**: TanStack Start (full-stack React framework with SSR)
-**Routing**: TanStack Router (file-based routing)
-**Primary Dependencies**:
-- TanStack Start / TanStack Router
-- Tailwind CSS v4
-- shadcn/ui (Radix-based component primitives)
-- Framer Motion (animations)
-- Lucide React (icons)
-
+**Primary Dependencies**: TanStack Start (full-stack framework), TanStack Router (file-based routing), Tailwind CSS v4, Shadcn UI, Framer Motion, Lucide React, Zod (schema validation)
 **Storage**: Static JSON files (`data/formatted_seguinot_cv_portfolio.json`), static images (`data/images/`)
 **Testing**: Vitest + React Testing Library (unit), Playwright (E2E)
-**Target Platform**: Web (Vercel deployment), SSR-enabled
-**Project Type**: Single web application (SPA with SSR)
-**Performance Goals**:
-- LCP < 2.5s
-- FID < 100ms
-- CLS < 0.1
-- INP < 200ms
-- Lighthouse 90+ mobile
-- Initial JS bundle < 100KB gzipped
-
-**Constraints**:
-- Mobile-first responsive design (320px - 2560px)
-- WCAG 2.1 AA accessibility compliance
-- No backend API (static data)
-- Dark mode default with theme persistence
-
-**Scale/Scope**: Single-page portfolio, 12 projects, 28 images, 7 skill categories
+**Target Platform**: Web (Vercel deployment), responsive 320px-2560px
+**Project Type**: Web SPA (Single Page Application with SSR via TanStack Start)
+**Performance Goals**: LCP < 2.5s, FID < 100ms, CLS < 0.1, INP < 200ms, Lighthouse 90+ mobile
+**Constraints**: Initial JS bundle < 100KB gzipped, images lazy-loaded, Core Web Vitals targets
+**Scale/Scope**: 1 page (scrollable sections), 12 projects, 28 screenshots, 7 skill categories
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-| Principle | Status | Implementation |
-|-----------|--------|----------------|
-| I. Clean Architecture | ✅ PASS | Feature-based folder structure with components/, features/, hooks/ |
-| II. Tech Stack | ✅ PASS | React 19, TypeScript, TanStack Start, Tailwind CSS |
-| III. Testing First | ✅ PASS | Vitest + RTL for unit tests, Playwright for E2E |
-| IV. Accessibility | ✅ PASS | shadcn/ui (Radix-based), semantic HTML, WCAG 2.1 AA |
-| V. Performance | ✅ PASS | SSR, lazy loading, image optimization, < 100KB bundle |
-| VI. Minimal Dependencies | ✅ PASS | shadcn/ui (headless), no heavy UI frameworks |
-| VII. Swiss Style | ✅ PASS | Grid-based layout, typography hierarchy, high contrast |
-| VIII. Micro-interactions | ✅ PASS | Framer Motion for animations, reduced-motion support |
-| IX. Content-First | ✅ PASS | CV data from JSON, no Lorem Ipsum |
-| X. Responsive Design | ✅ PASS | Mobile-first, Tailwind responsive prefixes |
+### Pre-Design Check (Phase 0 Gate)
 
-**All gates passed. Proceeding to Phase 0.**
+| Principle | Status | Notes |
+|-----------|--------|-------|
+| I. Clean Architecture | ✅ PASS | Feature-based folder structure with FSD principles |
+| II. Tech Stack | ✅ PASS | React 19, TypeScript strict, TanStack Start, Tailwind CSS |
+| III. Testing First | ✅ PASS | Vitest + RTL for units, Playwright for E2E, >90% coverage target |
+| IV. Accessibility | ✅ PASS | React Aria/Radix primitives via Shadcn, semantic HTML, WCAG 2.1 AA |
+| V. Performance | ✅ PASS | Core Web Vitals targets defined, lazy loading, code splitting |
+| VI. Minimal Dependencies | ✅ PASS | Radix-based Shadcn (headless), no heavy UI frameworks |
+| VII. Swiss Style | ✅ PASS | Grid-based layout, high contrast, typography hierarchy |
+| VIII. Micro-interactions | ✅ PASS | Framer Motion for subtle animations, respects reduced-motion |
+| IX. Content-First | ✅ PASS | Real CV data from JSON, no Lorem Ipsum |
+| X. Responsive Design | ✅ PASS | Mobile-first, 320px minimum, Tailwind responsive prefixes |
+
+**Gate Status**: ✅ ALL GATES PASS - Proceeded to Phase 0
+
+### Post-Design Check (Phase 1 Gate)
+
+| Principle | Status | Notes |
+|-----------|--------|-------|
+| I. Clean Architecture | ✅ PASS | `app/lib/schemas/` for Zod schemas, `app/lib/data/` for loaders, feature-based components |
+| II. Tech Stack | ✅ PASS | Added Zod for runtime validation, all other stack confirmed |
+| III. Testing First | ✅ PASS | Zod schemas are testable; data loader functions have clear test targets |
+| IV. Accessibility | ✅ PASS | Screenshot schema enforces alt text; Dialog (lightbox) is Radix-based |
+| V. Performance | ✅ PASS | Static data validated at build time; no runtime performance impact |
+| VI. Minimal Dependencies | ✅ PASS | Zod is lightweight (~12KB gzipped), justified for type safety demonstration |
+| VII. Swiss Style | ✅ PASS | Data model supports grid-based skill categories display |
+| VIII. Micro-interactions | ✅ PASS | No changes to animation strategy |
+| IX. Content-First | ✅ PASS | Zod validates real CV data structure; enforces data quality |
+| X. Responsive Design | ✅ PASS | Data model agnostic to presentation; components handle responsiveness |
+
+**Gate Status**: ✅ ALL GATES PASS - Ready for task generation
 
 ## Project Structure
 
@@ -64,12 +65,12 @@ Build a Senior Frontend Developer portfolio website (seguinot-io) showcasing 12 
 
 ```text
 specs/001-portfolio-site/
-├── plan.md              # This file
-├── research.md          # Phase 0 output
-├── data-model.md        # Phase 1 output
-├── quickstart.md        # Phase 1 output
-├── contracts/           # Phase 1 output (N/A - no API)
-└── tasks.md             # Phase 2 output (/speckit.tasks command)
+├── plan.md              # This file (/speckit.plan command output)
+├── research.md          # Phase 0 output (/speckit.plan command)
+├── data-model.md        # Phase 1 output (/speckit.plan command)
+├── quickstart.md        # Phase 1 output (/speckit.plan command)
+├── contracts/           # Phase 1 output (/speckit.plan command) - N/A for static site
+└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
 ```
 
 ### Source Code (repository root)
@@ -78,66 +79,43 @@ specs/001-portfolio-site/
 app/
 ├── routes/
 │   ├── __root.tsx           # Root layout with theme provider
-│   └── index.tsx            # Home page (single-page sections)
+│   └── index.tsx            # Main portfolio page
 ├── components/
-│   ├── ui/                  # shadcn/ui components
-│   │   ├── button.tsx
-│   │   ├── card.tsx
-│   │   ├── dialog.tsx       # For image lightbox
-│   │   └── ...
-│   ├── layout/
-│   │   ├── Header.tsx
-│   │   ├── Footer.tsx
-│   │   └── Section.tsx
-│   ├── hero/
-│   │   └── Hero.tsx
-│   ├── timeline/
-│   │   ├── Timeline.tsx
-│   │   ├── TimelineEntry.tsx
-│   │   └── TimelineAnimation.tsx
-│   ├── skills/
-│   │   ├── SkillsGrid.tsx
-│   │   └── SkillCategory.tsx
-│   ├── projects/
-│   │   ├── ProjectShowcase.tsx
-│   │   ├── ProjectCard.tsx
-│   │   └── ImageLightbox.tsx
-│   ├── contact/
-│   │   └── Contact.tsx
-│   └── theme/
-│       ├── ThemeProvider.tsx
-│       └── ThemeToggle.tsx
-├── hooks/
-│   ├── useTheme.ts
-│   ├── useScrollTo.ts
-│   └── useReducedMotion.ts
+│   ├── ui/                  # Shadcn UI components
+│   ├── hero/                # Hero section components
+│   ├── timeline/            # Experience timeline components
+│   ├── skills/              # Tech stack grid components
+│   ├── projects/            # Project case study components
+│   ├── contact/             # Contact section components
+│   └── shared/              # Shared components (theme toggle, lightbox)
 ├── lib/
-│   ├── cv-data.ts           # CV data loader and types
-│   ├── screenshot-mapper.ts  # Map screenshots to projects
-│   └── utils.ts             # cn() and utilities
+│   ├── schemas/             # Zod schemas for CV data types
+│   ├── data/                # Data loading and parsing with Zod validation
+│   └── utils/               # Utility functions (cn, theme helpers)
+├── hooks/
+│   └── use-theme.ts         # Theme context hook
 └── styles/
-    └── globals.css          # Tailwind imports, CSS variables
+    └── globals.css          # Tailwind CSS global styles
 
 data/
-├── formatted_seguinot_cv_portfolio.json
-├── formatted_seguinot_cv.md
-└── images/
-    └── [28 project screenshots]
+├── formatted_seguinot_cv_portfolio.json  # CV structured data
+└── images/                               # Project screenshots (28 files)
 
 tests/
-├── unit/
+├── unit/                    # Vitest unit tests
 │   ├── components/
+│   ├── lib/
 │   └── hooks/
-└── e2e/
+└── e2e/                     # Playwright E2E tests
     └── portfolio.spec.ts
 ```
 
-**Structure Decision**: TanStack Start file-based routing with feature-organized components. Single route (index) with section-based navigation using smooth scrolling.
+**Structure Decision**: Single-project web structure using TanStack Start file-based routing. The `app/` directory follows TanStack Start conventions with `routes/` for pages and feature-based `components/` organization. Static data remains in `data/` at root level for build-time access.
 
 ## Complexity Tracking
 
-> No constitution violations requiring justification.
+> **No violations to justify** - All constitution principles are satisfied with the chosen architecture.
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
-| N/A | - | - |
+| (none) | - | - |

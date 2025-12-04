@@ -5,7 +5,7 @@
 
 ## Overview
 
-All data is sourced from static JSON files at build time. No database or API required. TypeScript types provide compile-time safety and IDE support.
+All data is sourced from static JSON files at build time. No database or API required. **Zod schemas provide both runtime validation and compile-time type safety**, demonstrating professional TypeScript practices even for a static portfolio.
 
 ## Source Files
 
@@ -15,107 +15,149 @@ All data is sourced from static JSON files at build time. No database or API req
 | `data/formatted_seguinot_cv.md` | Extended descriptions (reference only) |
 | `data/images/*.png` | Project screenshots (28 files) |
 
-## TypeScript Types
+## Zod Schemas
 
-### CVData (Root Entity)
+All data types are defined using Zod schemas with inferred TypeScript types. This provides:
+- Runtime validation at build time
+- Automatic TypeScript type generation
+- Self-documenting data contracts
+- Graceful error handling with meaningful messages
+
+### Contact Schema
 
 ```typescript
-// app/lib/cv-data.ts
+// app/lib/schemas/cv.schema.ts
 
-export interface CVData {
-  profile: Profile
-  skills: SkillCategories
-  projects: Project[]
-  education: Education[]
-  languages: Language[]
-}
+import { z } from 'zod'
+
+export const ContactSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  phone: z.string().min(1, 'Phone is required'),
+  linkedin: z.string().url('LinkedIn must be a valid URL'),
+  github: z.string().optional().default(''),
+  portfolio: z.string().optional().default(''),
+})
+
+export type Contact = z.infer<typeof ContactSchema>
 ```
 
-### Profile
+### Profile Schema
 
 ```typescript
-export interface Profile {
-  name: string                    // "Christophe Seguinot"
-  title: string                   // "Senior Frontend Developer"
-  location: string                // "Chorges, France"
-  summary: string                 // Professional summary paragraph
-  contact: ContactInfo
-}
+export const ProfileSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  title: z.string().min(1, 'Title is required'),
+  location: z.string().min(1, 'Location is required'),
+  summary: z.string().min(1, 'Summary is required'),
+  contact: ContactSchema,
+})
 
-export interface ContactInfo {
-  email: string                   // "christophe.seguinot@gmail.com"
-  phone: string                   // "+33 6 26 33 07 10"
-  linkedin: string                // "https://linkedin.com/in/christophe-seguinot"
-  github: string                  // Optional, may be empty
-  portfolio: string               // Optional, may be empty
-}
+export type Profile = z.infer<typeof ProfileSchema>
 ```
 
-### Skills
+### Period Schema
 
 ```typescript
-export interface SkillCategories {
-  Languages: string[]             // ["JavaScript", "TypeScript", ...]
-  Frontend: string[]              // ["React 19", "Next.js", ...]
-  Testing: string[]               // ["Vitest", "Cypress", ...]
-  Styling: string[]               // ["Tailwind CSS", ...]
-  Tools: string[]                 // ["Git", "Docker", ...]
-  "Cloud & Infrastructure": string[]  // ["Azure", "AWS Amplify"]
-  Methodologies: string[]         // ["Agile/Scrum", "TDD", ...]
-}
+export const PeriodSchema = z.object({
+  start: z.string().min(1, 'Start date is required'),
+  end: z.string().min(1, 'End date is required'),
+})
 
-// Type for skill category keys
-export type SkillCategoryKey = keyof SkillCategories
+export type Period = z.infer<typeof PeriodSchema>
 ```
 
-### Project
+### Project Schema
 
 ```typescript
-export interface Project {
-  title: string                   // "Memory Platform"
-  role: string                    // "Senior Frontend Developer"
-  company: string                 // "Egis"
-  location: string                // "Remote"
-  period: ProjectPeriod
-  highlights: string[]            // Array of achievement bullets
-  technologies: string[]          // ["React", "TypeScript", ...]
-}
+export const ProjectSchema = z.object({
+  title: z.string().min(1, 'Project title is required'),
+  role: z.string().min(1, 'Role is required'),
+  company: z.string().min(1, 'Company is required'),
+  location: z.string().min(1, 'Location is required'),
+  period: PeriodSchema,
+  highlights: z.array(z.string()).min(1, 'At least one highlight is required'),
+  technologies: z.array(z.string()).default([]),
+})
 
-export interface ProjectPeriod {
-  start: string                   // "May 2025"
-  end: string                     // "Present" or "December 2023"
-}
-
-// Derived type for projects with screenshots
-export interface ProjectWithScreenshots extends Project {
-  screenshots: Screenshot[]
-}
-
-export interface Screenshot {
-  filename: string                // "memory-landing-page.png"
-  path: string                    // "/images/memory-landing-page.png"
-  alt: string                     // Generated from filename
-}
+export type Project = z.infer<typeof ProjectSchema>
 ```
 
-### Education
+### Skills Schema
 
 ```typescript
-export interface Education {
-  degree: string                  // "Engineering Degree"
-  institution: string             // "Ecole Centrale de Marseille"
-  period: string                  // "September 2000 - September 2003"
-  honors: string[]                // ["Graduated with honors"]
-}
+export const SkillsSchema = z.object({
+  Languages: z.array(z.string()),
+  Frontend: z.array(z.string()),
+  Testing: z.array(z.string()),
+  Styling: z.array(z.string()),
+  Tools: z.array(z.string()),
+  'Cloud & Infrastructure': z.array(z.string()),
+  Methodologies: z.array(z.string()),
+})
+
+export type Skills = z.infer<typeof SkillsSchema>
+export type SkillCategoryKey = keyof Skills
 ```
 
-### Language
+### Education Schema
 
 ```typescript
-export interface Language {
-  name: string                    // "French"
-  level: string                   // "Native" or "Professional"
-}
+export const EducationSchema = z.object({
+  degree: z.string().min(1, 'Degree is required'),
+  institution: z.string().min(1, 'Institution is required'),
+  period: z.string().min(1, 'Period is required'),
+  honors: z.array(z.string()).optional().default([]),
+})
+
+export type Education = z.infer<typeof EducationSchema>
+```
+
+### Language Schema
+
+```typescript
+export const LanguageSchema = z.object({
+  name: z.string().min(1, 'Language name is required'),
+  level: z.string().min(1, 'Proficiency level is required'),
+})
+
+export type Language = z.infer<typeof LanguageSchema>
+```
+
+### CVData Schema (Root)
+
+```typescript
+export const CVDataSchema = z.object({
+  profile: ProfileSchema,
+  skills: SkillsSchema,
+  projects: z.array(ProjectSchema).min(1, 'At least one project is required'),
+  education: z.array(EducationSchema),
+  languages: z.array(LanguageSchema),
+})
+
+export type CVData = z.infer<typeof CVDataSchema>
+```
+
+## Screenshot Schema
+
+```typescript
+// app/lib/schemas/screenshot.schema.ts
+
+import { z } from 'zod'
+
+export const ScreenshotSchema = z.object({
+  filename: z.string().regex(/\.(png|jpg|jpeg|webp)$/i, 'Must be an image file'),
+  path: z.string().startsWith('/images/', 'Path must start with /images/'),
+  alt: z.string().min(1, 'Alt text is required for accessibility'),
+})
+
+export type Screenshot = z.infer<typeof ScreenshotSchema>
+
+// Extended project with screenshots
+export const ProjectWithScreenshotsSchema = ProjectSchema.extend({
+  screenshots: z.array(ScreenshotSchema),
+})
+
+export type ProjectWithScreenshots = z.infer<typeof ProjectWithScreenshotsSchema>
 ```
 
 ## Screenshot Mapping
@@ -124,6 +166,8 @@ Static mapping between project titles and screenshot files:
 
 ```typescript
 // app/lib/screenshot-mapper.ts
+
+import { Screenshot, ScreenshotSchema } from './schemas/screenshot.schema'
 
 export const SCREENSHOT_MAP: Record<string, string[]> = {
   "IRIS Platform": [
@@ -168,15 +212,19 @@ export const SCREENSHOT_MAP: Record<string, string[]> = {
   "RenovationMan": [
     "renovationman-1.png"
   ]
-}
+} as const
 
 export function getProjectScreenshots(projectTitle: string): Screenshot[] {
   const filenames = SCREENSHOT_MAP[projectTitle] ?? []
-  return filenames.map(filename => ({
-    filename,
-    path: `/images/${filename}`,
-    alt: generateAltText(projectTitle, filename)
-  }))
+  return filenames.map(filename => {
+    const screenshot = {
+      filename,
+      path: `/images/${filename}`,
+      alt: generateAltText(projectTitle, filename)
+    }
+    // Validate at runtime
+    return ScreenshotSchema.parse(screenshot)
+  })
 }
 
 function generateAltText(project: string, filename: string): string {
@@ -188,77 +236,119 @@ function generateAltText(project: string, filename: string): string {
 }
 ```
 
-## Theme State
+## Theme State Schema
 
 ```typescript
-// app/hooks/useTheme.ts
+// app/lib/schemas/theme.schema.ts
 
-export type Theme = 'dark' | 'light'
+import { z } from 'zod'
 
-export interface ThemeContextType {
-  theme: Theme
-  setTheme: (theme: Theme) => void
-  toggleTheme: () => void
-}
+export const ThemeSchema = z.enum(['dark', 'light'])
+
+export type Theme = z.infer<typeof ThemeSchema>
+
+export const ThemeContextSchema = z.object({
+  theme: ThemeSchema,
+  setTheme: z.function().args(ThemeSchema).returns(z.void()),
+  toggleTheme: z.function().returns(z.void()),
+})
+
+export type ThemeContext = z.infer<typeof ThemeContextSchema>
 ```
 
-## Data Loading
+## Data Loading with Validation
 
 ```typescript
-// app/lib/cv-data.ts
+// app/lib/data/cv-loader.ts
 
-import cvData from '../../data/formatted_seguinot_cv_portfolio.json'
-import { getProjectScreenshots } from './screenshot-mapper'
+import { CVDataSchema, CVData, Profile, Skills, Project } from '../schemas/cv.schema'
+import { ProjectWithScreenshots } from '../schemas/screenshot.schema'
+import { getProjectScreenshots } from '../screenshot-mapper'
+import rawCvData from '../../../data/formatted_seguinot_cv_portfolio.json'
 
-export function getCVData(): CVData {
-  return cvData as CVData
+// Validate and parse CV data at load time
+function loadCVData(): CVData {
+  const result = CVDataSchema.safeParse(rawCvData)
+
+  if (!result.success) {
+    console.error('CV Data validation failed:', result.error.format())
+    throw new Error('Unable to load content: CV data is malformed')
+  }
+
+  return result.data
 }
 
-export function getProjectsWithScreenshots(): ProjectWithScreenshots[] {
-  const data = getCVData()
-  return data.projects.map(project => ({
-    ...project,
-    screenshots: getProjectScreenshots(project.title)
-  }))
+// Cached parsed data
+let cachedData: CVData | null = null
+
+export function getCVData(): CVData {
+  if (!cachedData) {
+    cachedData = loadCVData()
+  }
+  return cachedData
 }
 
 export function getProfile(): Profile {
   return getCVData().profile
 }
 
-export function getSkills(): SkillCategories {
+export function getSkills(): Skills {
   return getCVData().skills
+}
+
+export function getProjects(): Project[] {
+  return getCVData().projects
+}
+
+export function getProjectsWithScreenshots(): ProjectWithScreenshots[] {
+  return getProjects().map(project => ({
+    ...project,
+    screenshots: getProjectScreenshots(project.title)
+  }))
+}
+
+export function getEducation() {
+  return getCVData().education
+}
+
+export function getLanguages() {
+  return getCVData().languages
 }
 ```
 
-## Validation Rules
+## Validation Rules Summary
 
-| Entity | Field | Rule |
-|--------|-------|------|
-| Profile | email | Must be valid email format |
-| Profile | linkedin | Must be valid URL |
-| Project | period.start | Must be non-empty string |
-| Project | highlights | Must have at least 1 item |
-| Screenshot | filename | Must exist in data/images/ |
+| Schema | Field | Validation |
+|--------|-------|------------|
+| Contact | email | Valid email format |
+| Contact | linkedin | Valid URL format |
+| Profile | name, title, location, summary | Non-empty strings |
+| Project | highlights | At least 1 item required |
+| Screenshot | filename | Must match image file pattern |
+| Screenshot | path | Must start with /images/ |
+| Screenshot | alt | Non-empty (accessibility) |
+| Theme | value | Must be 'dark' or 'light' |
 
 ## Entity Relationships
 
 ```
-CVData
-├── Profile
-│   └── ContactInfo
-├── SkillCategories (7 categories)
-├── Project[] (12 items)
-│   ├── ProjectPeriod
-│   └── Screenshot[] (via mapping)
-├── Education[] (1 item)
-└── Language[] (2 items)
+CVData (validated by CVDataSchema)
+├── Profile (ProfileSchema)
+│   └── Contact (ContactSchema)
+├── Skills (SkillsSchema) - 7 categories
+├── Project[] (ProjectSchema) - 12 items
+│   ├── Period (PeriodSchema)
+│   └── Screenshot[] (ScreenshotSchema) - via mapping
+├── Education[] (EducationSchema) - 1 item
+└── Language[] (LanguageSchema) - 2 items
 ```
 
 ## Constants
 
 ```typescript
 // app/lib/constants.ts
+
+import { SkillCategoryKey } from './schemas/cv.schema'
 
 export const SKILL_CATEGORY_ORDER: SkillCategoryKey[] = [
   'Languages',
@@ -273,9 +363,29 @@ export const SKILL_CATEGORY_ORDER: SkillCategoryKey[] = [
 export const FEATURED_PROJECTS = [
   'Memory Platform',
   'IRIS Platform'
-]
+] as const
 
 export const PROJECT_COUNT = 12
 export const SCREENSHOT_COUNT = 28
 export const SKILL_CATEGORY_COUNT = 7
 ```
+
+## Error Handling
+
+The Zod schemas enable graceful error handling as specified in the edge cases:
+
+```typescript
+// Example: Handling malformed JSON
+try {
+  const data = getCVData()
+} catch (error) {
+  // Display: "Unable to load content"
+  // Log detailed Zod validation errors for debugging
+}
+```
+
+This approach ensures:
+1. **Build-time validation**: Malformed data caught during development
+2. **Runtime safety**: Graceful error states in production
+3. **Type inference**: Full TypeScript support via `z.infer<>`
+4. **Documentation**: Schemas serve as living data contracts

@@ -3,6 +3,7 @@
 ## Active Technologies
 - TypeScript 5.x, React 19, Node.js 20+ (001-portfolio-site)
 - Static JSON files (`data/formatted_seguinot_cv_portfolio.json`), static images (`data/images/`) (001-portfolio-site)
+- TypeScript 5.x, React 19, Node.js 20+ + TanStack Start (full-stack framework), TanStack Router (file-based routing), Tailwind CSS v4, Shadcn UI, Framer Motion, Lucide React, Zod (schema validation) (001-portfolio-site)
 
 ## Recent Changes
 - 001-portfolio-site: Added TypeScript 5.x, React 19, Node.js 20+

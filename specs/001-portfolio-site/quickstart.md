@@ -29,7 +29,7 @@ cd seguinot-io
 
 ```bash
 # Core dependencies
-npm install framer-motion lucide-react
+npm install framer-motion lucide-react zod
 
 # Development dependencies
 npm install -D @types/node vitest @testing-library/react @testing-library/jest-dom jsdom playwright @playwright/test
@@ -141,11 +141,11 @@ export default defineConfig({
 Create the following directory structure:
 
 ```bash
-mkdir -p app/components/{ui,layout,hero,timeline,skills,projects,contact,theme}
+mkdir -p app/components/{ui,layout,hero,timeline,skills,projects,contact,shared}
 mkdir -p app/hooks
-mkdir -p app/lib
+mkdir -p app/lib/{schemas,data,utils}
 mkdir -p app/styles
-mkdir -p tests/{unit,e2e}
+mkdir -p tests/{unit/{components,lib,hooks},e2e}
 ```
 
 ## Development Workflow
@@ -225,11 +225,13 @@ After setup, verify:
 
 ## Key Files to Create First
 
-1. `app/lib/cv-data.ts` - Data loading utilities
-2. `app/lib/screenshot-mapper.ts` - Screenshot mapping
-3. `app/components/theme/ThemeProvider.tsx` - Theme context
-4. `app/routes/__root.tsx` - Root layout
-5. `app/routes/index.tsx` - Home page with all sections
+1. `app/lib/schemas/cv.schema.ts` - Zod schemas for CV data types
+2. `app/lib/schemas/screenshot.schema.ts` - Zod schemas for screenshots
+3. `app/lib/data/cv-loader.ts` - Data loading with Zod validation
+4. `app/lib/screenshot-mapper.ts` - Screenshot mapping
+5. `app/hooks/use-theme.ts` - Theme context hook
+6. `app/routes/__root.tsx` - Root layout with theme provider
+7. `app/routes/index.tsx` - Home page with all sections
 
 ## Common Issues
 
