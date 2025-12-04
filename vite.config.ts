@@ -9,7 +9,7 @@ import { nitro } from 'nitro/vite'
 const config = defineConfig({
   plugins: [
     tanstackStart({
-      appDirectory: 'app',
+      srcDirectory: 'app',
     }),
     nitro({
       preset: 'vercel',
