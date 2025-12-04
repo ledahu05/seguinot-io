@@ -27,11 +27,11 @@ export function TimelineEntry({
       className={`relative flex ${isLeft ? 'flex-row-reverse' : ''} items-start gap-4 md:gap-8`}
     >
       {/* Timeline dot */}
-      <div className="absolute left-0 top-2 h-3 w-3 rounded-full bg-primary md:left-1/2 md:-translate-x-1/2" />
+      <div className="absolute left-0 top-5 hidden h-3 w-3 rounded-full bg-primary min-[407px]:block md:left-1/2 md:top-2 md:-translate-x-1/2" />
 
       {/* Content */}
       <div
-        className={`ml-6 w-full md:ml-0 md:w-[calc(50%-2rem)] ${isLeft ? 'md:pr-8 md:text-right' : 'md:pl-8'}`}
+        className={`ml-0 min-[407px]:ml-8 w-full md:ml-0 md:w-[calc(50%-2rem)] ${isLeft ? 'md:pr-8 md:text-right' : 'md:pl-8'}`}
       >
         <div className="rounded-lg border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
           {/* Header */}

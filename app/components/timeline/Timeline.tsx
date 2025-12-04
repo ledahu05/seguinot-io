@@ -53,7 +53,7 @@ export function Timeline() {
         {/* Timeline container */}
         <div className="relative">
           {/* Vertical line */}
-          <div className="absolute left-1.5 top-0 hidden h-full w-0.5 bg-border md:left-1/2 md:block md:-translate-x-1/2" />
+          <div className="absolute left-[5px] top-0 hidden h-full w-0.5 bg-border min-[407px]:block md:left-1/2 md:-translate-x-1/2" />
 
           {/* Timeline entries */}
           <div className="space-y-8">
