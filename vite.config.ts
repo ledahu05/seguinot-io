@@ -8,18 +8,17 @@ import { nitro } from 'nitro/vite'
 
 const config = defineConfig({
   plugins: [
-    devtools(),
+    tanstackStart({
+      appDirectory: 'app',
+    }),
     nitro({
       preset: 'vercel',
     }),
-    // this is the plugin that enables path aliases
+    devtools(),
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],
     }),
     tailwindcss(),
-    tanstackStart({
-      appDirectory: 'app',
-    }),
     viteReact(),
   ],
 })
