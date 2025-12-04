@@ -29,7 +29,94 @@ npm create @tanstack/start@latest
 - Configure for Vercel deployment
 - Enable SSR for initial page load performance
 
-### 2. Tailwind CSS v4 with shadcn/ui
+### 2. Zod Schema Design for CV Data
+
+**Decision**: Implement strict Zod schemas for all CV data types with runtime validation
+
+**Rationale**:
+- Demonstrates type safety expertise (explicit user requirement)
+- Provides runtime validation catching malformed JSON at build time
+- Generates TypeScript types automatically via `z.infer<typeof schema>`
+- Documents data structure as living code
+- Enables graceful error handling per edge case requirements (FR-002)
+
+**Alternatives Considered**:
+- TypeScript interfaces only: No runtime validation, misses the demonstration goal
+- io-ts: More complex API, larger learning curve
+- Yup: Less TypeScript-native, focused on form validation
+
+**Schema Structure**:
+```typescript
+// app/lib/schemas/cv.schema.ts
+import { z } from 'zod'
+
+export const ContactSchema = z.object({
+  email: z.string().email(),
+  phone: z.string(),
+  linkedin: z.string().url(),
+  github: z.string().optional(),
+  portfolio: z.string().optional(),
+})
+
+export const ProfileSchema = z.object({
+  name: z.string().min(1),
+  title: z.string().min(1),
+  location: z.string(),
+  summary: z.string(),
+  contact: ContactSchema,
+})
+
+export const PeriodSchema = z.object({
+  start: z.string(),
+  end: z.string(),
+})
+
+export const ProjectSchema = z.object({
+  title: z.string(),
+  role: z.string(),
+  company: z.string(),
+  location: z.string(),
+  period: PeriodSchema,
+  highlights: z.array(z.string()),
+  technologies: z.array(z.string()),
+})
+
+export const SkillsSchema = z.record(z.string(), z.array(z.string()))
+
+export const EducationSchema = z.object({
+  degree: z.string(),
+  institution: z.string(),
+  period: z.string(),
+  honors: z.array(z.string()).optional(),
+})
+
+export const LanguageSchema = z.object({
+  name: z.string(),
+  level: z.string(),
+})
+
+export const CVDataSchema = z.object({
+  profile: ProfileSchema,
+  skills: SkillsSchema,
+  projects: z.array(ProjectSchema),
+  education: z.array(EducationSchema),
+  languages: z.array(LanguageSchema),
+})
+
+// Inferred types for use throughout the app
+export type CVData = z.infer<typeof CVDataSchema>
+export type Profile = z.infer<typeof ProfileSchema>
+export type Project = z.infer<typeof ProjectSchema>
+export type Skills = z.infer<typeof SkillsSchema>
+```
+
+**Implementation Notes**:
+- Define schemas in `app/lib/schemas/cv.schema.ts`
+- Use `safeParse()` for graceful error handling
+- Export inferred types for use throughout the application
+- Add custom error messages for user-friendly error states
+
+### 3. Tailwind CSS v4 with shadcn/ui
 
 **Decision**: Tailwind CSS v4 + shadcn/ui components
 
