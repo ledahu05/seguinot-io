@@ -1,6 +1,8 @@
 import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-router'
+import { Provider as ReduxProvider } from 'react-redux'
 import { ThemeProvider } from '@/components/shared/ThemeProvider'
 import { ThemeToggle } from '@/components/shared/ThemeToggle'
+import { store } from '../store'
 
 import globalsCss from '../styles/globals.css?url'
 
@@ -48,13 +50,15 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   return (
-    <ThemeProvider defaultTheme="dark">
-      {/* T075: Fixed header with ThemeToggle */}
-      <header className="fixed right-4 top-4 z-50">
-        <ThemeToggle />
-      </header>
-      <Outlet />
-    </ThemeProvider>
+    <ReduxProvider store={store}>
+      <ThemeProvider defaultTheme="dark">
+        {/* T075: Fixed header with ThemeToggle */}
+        <header className="fixed right-4 top-4 z-50">
+          <ThemeToggle />
+        </header>
+        <Outlet />
+      </ThemeProvider>
+    </ReduxProvider>
   )
 }
 

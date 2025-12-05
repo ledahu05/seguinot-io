@@ -10,33 +10,53 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GamesQuartoIndexRouteImport } from './routes/games/quarto/index'
+import { Route as GamesQuartoPlayRouteImport } from './routes/games/quarto/play'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GamesQuartoIndexRoute = GamesQuartoIndexRouteImport.update({
+  id: '/games/quarto/',
+  path: '/games/quarto/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesQuartoPlayRoute = GamesQuartoPlayRouteImport.update({
+  id: '/games/quarto/play',
+  path: '/games/quarto/play',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/games/quarto/play': typeof GamesQuartoPlayRoute
+  '/games/quarto': typeof GamesQuartoIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/games/quarto/play': typeof GamesQuartoPlayRoute
+  '/games/quarto': typeof GamesQuartoIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/games/quarto/play': typeof GamesQuartoPlayRoute
+  '/games/quarto/': typeof GamesQuartoIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/games/quarto/play' | '/games/quarto'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/games/quarto/play' | '/games/quarto'
+  id: '__root__' | '/' | '/games/quarto/play' | '/games/quarto/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  GamesQuartoPlayRoute: typeof GamesQuartoPlayRoute
+  GamesQuartoIndexRoute: typeof GamesQuartoIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,17 +68,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/games/quarto/': {
+      id: '/games/quarto/'
+      path: '/games/quarto'
+      fullPath: '/games/quarto'
+      preLoaderRoute: typeof GamesQuartoIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/quarto/play': {
+      id: '/games/quarto/play'
+      path: '/games/quarto/play'
+      fullPath: '/games/quarto/play'
+      preLoaderRoute: typeof GamesQuartoPlayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  GamesQuartoPlayRoute: GamesQuartoPlayRoute,
+  GamesQuartoIndexRoute: GamesQuartoIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 
-import type { getRouter } from '../app/router.tsx'
+import type { getRouter } from './router.tsx'
 import type { createStart } from '@tanstack/react-start'
 declare module '@tanstack/react-start' {
   interface Register {

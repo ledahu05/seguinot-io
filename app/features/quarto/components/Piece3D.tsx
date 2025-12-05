@@ -1,0 +1,154 @@
+import { useRef, useMemo } from 'react';
+import { useSpring, animated } from '@react-spring/three';
+import { Cylinder, Box, Sphere } from '@react-three/drei';
+import * as THREE from 'three';
+import type { Piece } from '../types/quarto.types';
+
+interface Piece3DProps {
+  piece: Piece;
+  position: [number, number, number];
+  isSelected?: boolean;
+  isHovered?: boolean;
+  onClick?: () => void;
+  onPointerOver?: () => void;
+  onPointerOut?: () => void;
+}
+
+// Color constants - wood-like tones
+const LIGHT_WOOD = '#D4A574'; // Light maple
+const DARK_WOOD = '#5D3A1A';  // Dark walnut
+const HIGHLIGHT_COLOR = '#FFD700'; // Gold highlight for selection
+const HOVER_EMISSIVE = '#444444';
+
+// Size constants
+const BASE_RADIUS = 0.35;
+const SHORT_HEIGHT = 0.6;
+const TALL_HEIGHT = 1.0;
+const HOLLOW_DEPTH = 0.2;
+
+export function Piece3D({
+  piece,
+  position,
+  isSelected = false,
+  isHovered = false,
+  onClick,
+  onPointerOver,
+  onPointerOut,
+}: Piece3DProps) {
+  const groupRef = useRef<THREE.Group>(null);
+
+  // Animation for selection/hover states
+  const { scale, positionY } = useSpring({
+    scale: isSelected ? 1.15 : isHovered ? 1.05 : 1,
+    positionY: isSelected ? position[1] + 0.2 : position[1],
+    config: { tension: 300, friction: 20 },
+  });
+
+  // Derive piece properties
+  const height = piece.height === 'tall' ? TALL_HEIGHT : SHORT_HEIGHT;
+  const color = piece.color === 'light' ? LIGHT_WOOD : DARK_WOOD;
+  const isRound = piece.shape === 'round';
+  const isHollow = piece.top === 'hollow';
+
+  // Memoized material
+  const material = useMemo(() => {
+    return (
+      <meshStandardMaterial
+        color={color}
+        roughness={0.7}
+        metalness={0.1}
+        emissive={isSelected ? HIGHLIGHT_COLOR : HOVER_EMISSIVE}
+        emissiveIntensity={isSelected ? 0.3 : isHovered ? 0.1 : 0}
+      />
+    );
+  }, [color, isSelected, isHovered]);
+
+  // Render the piece geometry based on attributes
+  const renderPieceGeometry = () => {
+    if (isRound) {
+      // Cylindrical piece
+      return (
+        <group>
+          {/* Main cylinder body */}
+          <Cylinder args={[BASE_RADIUS, BASE_RADIUS, height, 32]} position={[0, height / 2, 0]}>
+            {material}
+          </Cylinder>
+
+          {/* Hollow top (indentation) */}
+          {isHollow && (
+            <Cylinder
+              args={[BASE_RADIUS * 0.6, BASE_RADIUS * 0.6, HOLLOW_DEPTH, 32]}
+              position={[0, height - HOLLOW_DEPTH / 2 + 0.01, 0]}
+            >
+              <meshStandardMaterial
+                color={new THREE.Color(color).multiplyScalar(0.6).getStyle()}
+                roughness={0.8}
+                metalness={0.05}
+              />
+            </Cylinder>
+          )}
+
+          {/* Solid top (dome) */}
+          {!isHollow && (
+            <Sphere
+              args={[BASE_RADIUS, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2]}
+              position={[0, height, 0]}
+            >
+              {material}
+            </Sphere>
+          )}
+        </group>
+      );
+    } else {
+      // Square/rectangular piece
+      const size = BASE_RADIUS * 1.6;
+
+      return (
+        <group>
+          {/* Main box body */}
+          <Box args={[size, height, size]} position={[0, height / 2, 0]}>
+            {material}
+          </Box>
+
+          {/* Hollow top (square indentation) */}
+          {isHollow && (
+            <Box
+              args={[size * 0.6, HOLLOW_DEPTH, size * 0.6]}
+              position={[0, height - HOLLOW_DEPTH / 2 + 0.01, 0]}
+            >
+              <meshStandardMaterial
+                color={new THREE.Color(color).multiplyScalar(0.6).getStyle()}
+                roughness={0.8}
+                metalness={0.05}
+              />
+            </Box>
+          )}
+
+          {/* Solid top (slight pyramid/cap) */}
+          {!isHollow && (
+            <Box args={[size * 0.95, 0.08, size * 0.95]} position={[0, height + 0.04, 0]}>
+              {material}
+            </Box>
+          )}
+        </group>
+      );
+    }
+  };
+
+  return (
+    <animated.group
+      ref={groupRef}
+      position-x={position[0]}
+      position-y={positionY}
+      position-z={position[2]}
+      scale={scale}
+      onClick={onClick}
+      onPointerOver={onPointerOver}
+      onPointerOut={onPointerOut}
+    >
+      {renderPieceGeometry()}
+    </animated.group>
+  );
+}
+
+export default Piece3D;
