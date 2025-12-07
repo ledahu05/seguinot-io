@@ -124,19 +124,19 @@
 
 ### Tests for User Story 2
 
-- [ ] T040 [P] [US2] Unit tests for minimax algorithm in tests/unit/quarto/minimax.test.ts
+- [X] T040 [P] [US2] Unit tests for minimax algorithm in tests/unit/quarto/minimax.test.ts
 
 ### Implementation for User Story 2
 
-- [ ] T041 [P] [US2] Implement board evaluation heuristics in app/features/quarto/ai/evaluation.ts
-- [ ] T042 [US2] Implement minimax with alpha-beta pruning in app/features/quarto/ai/minimax.ts
-- [ ] T043 [US2] Create Web Worker wrapper for AI computation in app/features/quarto/ai/worker.ts
-- [ ] T044 [US2] Implement useAI hook for AI move triggering in app/features/quarto/hooks/useAI.ts
-- [ ] T045 [US2] Add AI difficulty selection UI to game mode selection
-- [ ] T046 [US2] Add RTK actions for AI: setAIThinking, applyAIMove in quartoSlice.ts
-- [ ] T047 [US2] Implement AI thinking indicator in GameStatus component
-- [ ] T048 [US2] Add AI move delay for UX (prevent instant moves)
-- [ ] T049 [US2] Create AI barrel export in app/features/quarto/ai/index.ts
+- [X] T041 [P] [US2] Implement board evaluation heuristics in app/features/quarto/ai/evaluation.ts
+- [X] T042 [US2] Implement minimax with alpha-beta pruning in app/features/quarto/ai/minimax.ts
+- [X] T043 [US2] Create Web Worker wrapper for AI computation in app/features/quarto/ai/worker.ts
+- [X] T044 [US2] Implement useAI hook for AI move triggering in app/features/quarto/hooks/useAI.ts
+- [X] T045 [US2] Add AI difficulty selection UI to game mode selection
+- [X] T046 [US2] Add RTK actions for AI: setAIThinking, applyAIMove in quartoSlice.ts
+- [X] T047 [US2] Implement AI thinking indicator in GameStatus component
+- [X] T048 [US2] Add AI move delay for UX (prevent instant moves)
+- [X] T049 [US2] Create AI barrel export in app/features/quarto/ai/index.ts
 
 **Checkpoint**: AI opponent playable at 3 difficulty levels, responds within 3 seconds
 

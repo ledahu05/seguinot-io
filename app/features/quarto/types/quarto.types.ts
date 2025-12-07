@@ -161,7 +161,7 @@ export const WINNING_LINES: number[][] = [
 ];
 
 export const AI_DEPTHS: Record<AIDifficulty, number> = {
-  easy: 2,
-  medium: 4,
-  hard: 6
+  easy: 1,
+  medium: 2,
+  hard: 3
 };
