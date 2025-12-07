@@ -18,13 +18,13 @@
 
 **Purpose**: Project initialization, dependencies, and basic structure
 
-- [ ] T001 Create feature directory structure per plan.md at app/features/quarto/
-- [ ] T002 Install 3D dependencies: @react-three/fiber @react-three/drei three @react-spring/three
-- [ ] T003 [P] Install state management: @reduxjs/toolkit react-redux
-- [ ] T004 [P] Install type definitions: @types/three
-- [ ] T005 Create route structure at app/routes/games/quarto/ (index.tsx, play.tsx, lobby.tsx)
-- [ ] T006 Configure Redux store integration in app/store.ts (add quartoReducer)
-- [ ] T007 [P] Create test directory structure at tests/unit/quarto/ and tests/integration/quarto/
+- [X] T001 Create feature directory structure per plan.md at app/features/quarto/
+- [X] T002 Install 3D dependencies: @react-three/fiber @react-three/drei three @react-spring/three
+- [X] T003 [P] Install state management: @reduxjs/toolkit react-redux
+- [X] T004 [P] Install type definitions: @types/three
+- [X] T005 Create route structure at app/routes/games/quarto/ (index.tsx, play.tsx, lobby.tsx)
+- [X] T006 Configure Redux store integration in app/store.ts (add quartoReducer)
+- [X] T007 [P] Create test directory structure at tests/unit/quarto/ and tests/integration/quarto/
 
 ---
 
@@ -34,18 +34,18 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T008 Define all TypeScript types and Zod schemas in app/features/quarto/types/quarto.types.ts
-- [ ] T009 [P] Implement piece generation utilities in app/features/quarto/utils/pieceAttributes.ts
-- [ ] T010 [P] Implement win detection logic in app/features/quarto/utils/winDetection.ts
-- [ ] T011 Create RTK slice with initial state in app/features/quarto/store/quartoSlice.ts
-- [ ] T012 [P] Create memoized selectors in app/features/quarto/store/selectors.ts
-- [ ] T013 Create store barrel export in app/features/quarto/store/index.ts
-- [ ] T014 Create utils barrel export in app/features/quarto/utils/index.ts
+- [X] T008 Define all TypeScript types and Zod schemas in app/features/quarto/types/quarto.types.ts
+- [X] T009 [P] Implement piece generation utilities in app/features/quarto/utils/pieceAttributes.ts
+- [X] T010 [P] Implement win detection logic in app/features/quarto/utils/winDetection.ts
+- [X] T011 Create RTK slice with initial state in app/features/quarto/store/quartoSlice.ts
+- [X] T012 [P] Create memoized selectors in app/features/quarto/store/selectors.ts
+- [X] T013 Create store barrel export in app/features/quarto/store/index.ts
+- [X] T014 Create utils barrel export in app/features/quarto/utils/index.ts
 
 ### Foundational Tests
 
-- [ ] T015 [P] Unit tests for piece attributes in tests/unit/quarto/pieceAttributes.test.ts
-- [ ] T016 [P] Unit tests for win detection in tests/unit/quarto/winDetection.test.ts
+- [X] T015 [P] Unit tests for piece attributes in tests/unit/quarto/pieceAttributes.test.ts
+- [X] T016 [P] Unit tests for win detection in tests/unit/quarto/winDetection.test.ts
 
 **Checkpoint**: Foundation ready - game logic validated, user story implementation can begin
 
@@ -59,12 +59,12 @@
 
 ### Implementation for User Story 4
 
-- [ ] T017 [P] [US4] Create 3D piece component with procedural geometry in app/features/quarto/components/Piece3D.tsx
-- [ ] T018 [P] [US4] Create 3D board component with 4x4 grid in app/features/quarto/components/Board3D.tsx
-- [ ] T019 [US4] Setup R3F Canvas with OrbitControls and lighting in app/routes/games/quarto/play.tsx
-- [ ] T020 [US4] Add piece placement animations with @react-spring/three in app/features/quarto/components/Piece3D.tsx
-- [ ] T021 [US4] Add wood-like materials and colors to board and pieces
-- [ ] T022 [US4] Implement camera controls (rotate, zoom limits) for optimal viewing
+- [X] T017 [P] [US4] Create 3D piece component with procedural geometry in app/features/quarto/components/Piece3D.tsx
+- [X] T018 [P] [US4] Create 3D board component with 4x4 grid in app/features/quarto/components/Board3D.tsx
+- [X] T019 [US4] Setup R3F Canvas with OrbitControls and lighting in app/routes/games/quarto/play.tsx
+- [X] T020 [US4] Add piece placement animations with @react-spring/three in app/features/quarto/components/Piece3D.tsx
+- [X] T021 [US4] Add wood-like materials and colors to board and pieces
+- [X] T022 [US4] Implement camera controls (rotate, zoom limits) for optimal viewing
 
 **Checkpoint**: 3D board renders with all 16 visually distinct pieces, smooth 60fps camera rotation
 
@@ -78,12 +78,12 @@
 
 ### Implementation for User Story 5
 
-- [ ] T023 [P] [US5] Create piece tray component in app/features/quarto/components/PieceTray.tsx
-- [ ] T024 [P] [US5] Create game status component (turn indicator) in app/features/quarto/components/GameStatus.tsx
-- [ ] T025 [US5] Add RTK actions: selectPiece, placePiece in app/features/quarto/store/quartoSlice.ts
-- [ ] T026 [US5] Implement piece selection highlighting with visual feedback
-- [ ] T027 [US5] Connect PieceTray to Redux state (available pieces, selection)
-- [ ] T028 [US5] Add keyboard navigation for piece selection (Tab, Enter, Arrow keys)
+- [X] T023 [P] [US5] Create piece tray component in app/features/quarto/components/PieceTray.tsx
+- [X] T024 [P] [US5] Create game status component (turn indicator) in app/features/quarto/components/GameStatus.tsx
+- [X] T025 [US5] Add RTK actions: selectPiece, placePiece in app/features/quarto/store/quartoSlice.ts
+- [X] T026 [US5] Implement piece selection highlighting with visual feedback
+- [X] T027 [US5] Connect PieceTray to Redux state (available pieces, selection)
+- [X] T028 [US5] Add keyboard navigation for piece selection (Tab, Enter, Arrow keys)
 
 **Checkpoint**: Pieces selectable from tray, selection visually indicated, available pieces update correctly
 
@@ -97,20 +97,20 @@
 
 ### Tests for User Story 1
 
-- [ ] T029 [P] [US1] Integration test for complete game flow in tests/integration/quarto/gameFlow.test.ts
+- [X] T029 [P] [US1] Integration test for complete game flow in tests/integration/quarto/gameFlow.test.ts
 
 ### Implementation for User Story 1
 
-- [ ] T030 [US1] Implement game initialization with random starting player in app/features/quarto/store/quartoSlice.ts
-- [ ] T031 [US1] Create useQuartoGame hook orchestrating game flow in app/features/quarto/hooks/useQuartoGame.ts
-- [ ] T032 [US1] Implement board click handler for piece placement in app/features/quarto/components/Board3D.tsx
-- [ ] T033 [US1] Add turn phase logic (selecting → placing → selecting) in quartoSlice.ts
-- [ ] T034 [US1] Implement "Call Quarto" button and validation in app/features/quarto/components/GameControls.tsx
-- [ ] T035 [US1] Create victory/draw screen with game outcome display
-- [ ] T036 [US1] Add "New Game" functionality to reset state
-- [ ] T037 [US1] Create game mode selection UI in app/routes/games/quarto/index.tsx
-- [ ] T038 [US1] Create hooks barrel export in app/features/quarto/hooks/index.ts
-- [ ] T039 [US1] Create components barrel export in app/features/quarto/components/index.ts
+- [X] T030 [US1] Implement game initialization with random starting player in app/features/quarto/store/quartoSlice.ts
+- [X] T031 [US1] Create useQuartoGame hook orchestrating game flow in app/features/quarto/hooks/useQuartoGame.ts
+- [X] T032 [US1] Implement board click handler for piece placement in app/features/quarto/components/Board3D.tsx
+- [X] T033 [US1] Add turn phase logic (selecting → placing → selecting) in quartoSlice.ts
+- [X] T034 [US1] Implement "Call Quarto" button and validation in app/features/quarto/components/GameControls.tsx
+- [X] T035 [US1] Create victory/draw screen with game outcome display
+- [X] T036 [US1] Add "New Game" functionality to reset state
+- [X] T037 [US1] Create game mode selection UI in app/routes/games/quarto/index.tsx
+- [X] T038 [US1] Create hooks barrel export in app/features/quarto/hooks/index.ts
+- [X] T039 [US1] Create components barrel export in app/features/quarto/components/index.ts
 
 **Checkpoint**: Complete local 2-player game playable from start to finish. This is the MVP!
 

@@ -35,24 +35,24 @@ function QuartoMenuPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-slate-900 to-slate-800 p-8">
-      <div className="w-full max-w-lg">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-slate-900 to-slate-800 p-4 sm:p-6 md:p-8">
+      <div className="w-full max-w-sm sm:max-w-md md:max-w-lg">
         {/* Header */}
-        <div className="mb-12 text-center">
-          <h1 className="mb-2 text-5xl font-bold text-amber-400">Quarto</h1>
-          <p className="text-lg text-slate-400">
+        <div className="mb-8 text-center sm:mb-12">
+          <h1 className="mb-2 text-3xl font-bold text-amber-400 sm:text-4xl md:text-5xl">Quarto</h1>
+          <p className="text-base text-slate-400 sm:text-lg">
             The strategic game of shared attributes
           </p>
         </div>
 
         {/* Mode Selection */}
         {!selectedMode && (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <button
               onClick={() => setSelectedMode('local')}
-              className="w-full rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 p-4 text-left transition-all hover:from-amber-400 hover:to-yellow-400 hover:shadow-lg hover:shadow-amber-500/25"
+              className="w-full rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 p-3 text-left transition-all hover:from-amber-400 hover:to-yellow-400 hover:shadow-lg hover:shadow-amber-500/25 sm:p-4"
             >
-              <h2 className="text-xl font-bold text-black">Local 2 Players</h2>
+              <h2 className="text-lg font-bold text-black sm:text-xl">Local 2 Players</h2>
               <p className="text-sm text-amber-900">
                 Play against a friend on the same device
               </p>
@@ -60,9 +60,9 @@ function QuartoMenuPage() {
 
             <button
               onClick={() => setSelectedMode('ai')}
-              className="w-full rounded-lg bg-gradient-to-r from-purple-500 to-violet-500 p-4 text-left transition-all hover:from-purple-400 hover:to-violet-400 hover:shadow-lg hover:shadow-purple-500/25"
+              className="w-full rounded-lg bg-gradient-to-r from-purple-500 to-violet-500 p-3 text-left transition-all hover:from-purple-400 hover:to-violet-400 hover:shadow-lg hover:shadow-purple-500/25 sm:p-4"
             >
-              <h2 className="text-xl font-bold text-white">vs AI</h2>
+              <h2 className="text-lg font-bold text-white sm:text-xl">vs AI</h2>
               <p className="text-sm text-purple-200">
                 Challenge the computer at various difficulties
               </p>
@@ -71,9 +71,9 @@ function QuartoMenuPage() {
             <button
               onClick={() => setSelectedMode('online')}
               disabled
-              className="w-full cursor-not-allowed rounded-lg bg-slate-700 p-4 text-left opacity-50"
+              className="w-full cursor-not-allowed rounded-lg bg-slate-700 p-3 text-left opacity-50 sm:p-4"
             >
-              <h2 className="text-xl font-bold text-slate-300">Online Multiplayer</h2>
+              <h2 className="text-lg font-bold text-slate-300 sm:text-xl">Online Multiplayer</h2>
               <p className="text-sm text-slate-500">Coming soon...</p>
             </button>
           </div>
@@ -166,7 +166,7 @@ function QuartoMenuPage() {
                     <button
                       key={level}
                       onClick={() => setDifficulty(level)}
-                      className={`rounded-lg px-4 py-2 font-medium capitalize transition-all ${
+                      className={`rounded-lg px-2 py-2 text-sm font-medium capitalize transition-all sm:px-4 sm:text-base ${
                         difficulty === level
                           ? 'bg-purple-500 text-white'
                           : 'bg-slate-700 text-slate-400 hover:bg-slate-600'

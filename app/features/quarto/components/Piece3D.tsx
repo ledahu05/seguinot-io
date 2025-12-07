@@ -9,6 +9,7 @@ interface Piece3DProps {
   position: [number, number, number];
   isSelected?: boolean;
   isHovered?: boolean;
+  isFocused?: boolean;
   onClick?: () => void;
   onPointerOver?: () => void;
   onPointerOut?: () => void;
@@ -18,6 +19,7 @@ interface Piece3DProps {
 const LIGHT_WOOD = '#D4A574'; // Light maple
 const DARK_WOOD = '#5D3A1A';  // Dark walnut
 const HIGHLIGHT_COLOR = '#FFD700'; // Gold highlight for selection
+const FOCUS_COLOR = '#00BFFF'; // Cyan for keyboard focus
 const HOVER_EMISSIVE = '#444444';
 
 // Size constants
@@ -31,16 +33,17 @@ export function Piece3D({
   position,
   isSelected = false,
   isHovered = false,
+  isFocused = false,
   onClick,
   onPointerOver,
   onPointerOut,
 }: Piece3DProps) {
   const groupRef = useRef<THREE.Group>(null);
 
-  // Animation for selection/hover states
+  // Animation for selection/hover/focus states
   const { scale, positionY } = useSpring({
-    scale: isSelected ? 1.15 : isHovered ? 1.05 : 1,
-    positionY: isSelected ? position[1] + 0.2 : position[1],
+    scale: isSelected ? 1.15 : (isHovered || isFocused) ? 1.05 : 1,
+    positionY: isSelected ? position[1] + 0.2 : (isFocused ? position[1] + 0.1 : position[1]),
     config: { tension: 300, friction: 20 },
   });
 
@@ -50,18 +53,27 @@ export function Piece3D({
   const isRound = piece.shape === 'round';
   const isHollow = piece.top === 'hollow';
 
+  // Determine emissive color and intensity based on state
+  const getEmissiveProps = () => {
+    if (isSelected) return { emissive: HIGHLIGHT_COLOR, intensity: 0.3 };
+    if (isFocused) return { emissive: FOCUS_COLOR, intensity: 0.25 };
+    if (isHovered) return { emissive: HOVER_EMISSIVE, intensity: 0.1 };
+    return { emissive: HOVER_EMISSIVE, intensity: 0 };
+  };
+
   // Memoized material
   const material = useMemo(() => {
+    const { emissive, intensity } = getEmissiveProps();
     return (
       <meshStandardMaterial
         color={color}
         roughness={0.7}
         metalness={0.1}
-        emissive={isSelected ? HIGHLIGHT_COLOR : HOVER_EMISSIVE}
-        emissiveIntensity={isSelected ? 0.3 : isHovered ? 0.1 : 0}
+        emissive={emissive}
+        emissiveIntensity={intensity}
       />
     );
-  }, [color, isSelected, isHovered]);
+  }, [color, isSelected, isHovered, isFocused]);
 
   // Render the piece geometry based on attributes
   const renderPieceGeometry = () => {

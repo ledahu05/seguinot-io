@@ -7,6 +7,7 @@ interface PieceTrayProps {
     selectedPieceId?: number | null;
     onPieceSelect?: (pieceId: number) => void;
     disabled?: boolean;
+    focusedIndex?: number | null;
 }
 
 // Layout constants
@@ -19,7 +20,8 @@ export function PieceTray({
     availablePieces,
     selectedPieceId,
     onPieceSelect,
-    disabled = false
+    disabled = false,
+    focusedIndex = null
 }: PieceTrayProps) {
     // Calculate position for each piece in the tray
     const getPiecePosition = (index: number): [number, number, number] => {
@@ -36,6 +38,7 @@ export function PieceTray({
         return availablePieces.map((piece, index) => {
             const position = getPiecePosition(index);
             const isSelected = piece.id === selectedPieceId;
+            const isFocused = index === focusedIndex;
 
             return (
                 <Piece3D
@@ -43,13 +46,14 @@ export function PieceTray({
                     piece={piece}
                     position={position}
                     isSelected={isSelected}
+                    isFocused={isFocused}
                     onClick={
                         disabled ? undefined : () => onPieceSelect?.(piece.id)
                     }
                 />
             );
         });
-    }, [availablePieces, selectedPieceId, onPieceSelect, disabled]);
+    }, [availablePieces, selectedPieceId, onPieceSelect, disabled, focusedIndex]);
 
     return <group>{pieceElements}</group>;
 }

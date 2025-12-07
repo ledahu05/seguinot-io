@@ -11,6 +11,7 @@ interface Board3DProps {
   onPositionHover?: (position: number | null) => void;
   selectedPosition?: number | null;
   hoveredPosition?: number | null;
+  focusedPosition?: number | null;
   winningLine?: number[] | null;
 }
 
@@ -26,6 +27,7 @@ const BOARD_COLOR = '#8B4513'; // Saddle brown - rich wood
 const BOARD_DARK_COLOR = '#5D3A1A'; // Darker wood for accents
 const INDENT_COLOR = '#654321'; // Dark wood indent
 const WINNING_HIGHLIGHT = '#FFD700'; // Gold for winning positions
+const FOCUS_HIGHLIGHT = '#00BFFF'; // Cyan for keyboard focus
 
 export function Board3D({
   board,
@@ -33,6 +35,7 @@ export function Board3D({
   onPositionHover,
   selectedPosition,
   hoveredPosition,
+  focusedPosition,
   winningLine,
 }: Board3DProps) {
   // Calculate 3D position from board position index
@@ -113,6 +116,11 @@ export function Board3D({
       const [x, y, z] = getPositionCoords(pos);
       const isHovered = hoveredPosition === pos;
       const isSelected = selectedPosition === pos;
+      const isFocused = focusedPosition === pos;
+      const isHighlighted = isHovered || isSelected || isFocused;
+
+      // Determine color based on state priority: focused > hovered/selected
+      const zoneColor = isFocused ? FOCUS_HIGHLIGHT : (isHovered || isSelected ? '#4CAF50' : INDENT_COLOR);
 
       zones.push(
         <Cylinder
@@ -124,18 +132,18 @@ export function Board3D({
           onPointerOut={() => onPositionHover?.(null)}
         >
           <meshStandardMaterial
-            color={isHovered || isSelected ? '#4CAF50' : INDENT_COLOR}
+            color={zoneColor}
             roughness={0.9}
             metalness={0}
             transparent
-            opacity={isHovered || isSelected ? 0.6 : 0}
+            opacity={isHighlighted ? 0.6 : 0}
           />
         </Cylinder>
       );
     }
 
     return zones;
-  }, [board.positions, hoveredPosition, selectedPosition, onPositionClick, onPositionHover]);
+  }, [board.positions, hoveredPosition, selectedPosition, focusedPosition, onPositionClick, onPositionHover]);
 
   // Render placed pieces
   const placedPieces = useMemo(() => {
