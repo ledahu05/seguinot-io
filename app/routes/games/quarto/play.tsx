@@ -8,7 +8,7 @@ import {
     GameStatus,
     GameControls
 } from '@/features/quarto/components';
-import { useQuartoGame, useResponsiveCamera, useKeyboardNavigation } from '@/features/quarto/hooks';
+import { useQuartoGame, useResponsiveCamera, useKeyboardNavigation, useAI } from '@/features/quarto/hooks';
 import { createEmptyBoard } from '@/features/quarto/utils';
 
 export const Route = createFileRoute('/games/quarto/play')({
@@ -59,6 +59,24 @@ function QuartoPlayPage() {
         board: board?.positions ?? []
     });
 
+    // Determine if it's AI's turn
+    const isAIGame = game?.mode === 'ai';
+    const aiPlayer = game?.players.find(p => p.type === 'ai');
+    const aiPlayerIndex = game?.players.findIndex(p => p.type === 'ai') as 0 | 1 | undefined;
+    const isAITurn = isAIGame && aiPlayerIndex !== undefined && game?.currentTurn === aiPlayerIndex;
+
+    // AI hook - handles automatic AI moves
+    useAI({
+        enabled: isAIGame,
+        isAITurn: isAITurn ?? false,
+        board,
+        availablePieces: availablePieces.map(p => p.id),
+        selectedPiece: selectedPiece?.id ?? null,
+        phase,
+        difficulty: aiPlayer?.difficulty ?? 'medium',
+        gameStatus: status,
+    });
+
     // Redirect if no game is active
     if (!game) {
         return (
@@ -77,12 +95,18 @@ function QuartoPlayPage() {
     }
 
     const handlePositionClick = (position: number) => {
+        if (isAITurn || isAIThinking) {
+            return;
+        }
         if (phase === 'placing') {
             placePiece(position);
         }
     };
 
     const handlePieceSelect = (pieceId: number) => {
+        if (isAITurn || isAIThinking) {
+            return;
+        }
         if (phase === 'selecting') {
             selectPiece(pieceId);
         }
