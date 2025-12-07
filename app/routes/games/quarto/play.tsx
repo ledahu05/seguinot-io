@@ -95,12 +95,18 @@ function QuartoPlayPage() {
     }
 
     const handlePositionClick = (position: number) => {
+        if (isAITurn || isAIThinking) {
+            return;
+        }
         if (phase === 'placing') {
             placePiece(position);
         }
     };
 
     const handlePieceSelect = (pieceId: number) => {
+        if (isAITurn || isAIThinking) {
+            return;
+        }
         if (phase === 'selecting') {
             selectPiece(pieceId);
         }

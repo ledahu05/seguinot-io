@@ -41,6 +41,10 @@ export function useAI({
   const abortRef = useRef(false);
 
   const triggerAIMove = useCallback(async () => {
+    // Reset abort flag at the very start of each new attempt
+    // This ensures previous cleanup doesn't block new moves
+    abortRef.current = false;
+
     if (!enabled || !isAITurn || !board || !phase || gameStatus !== 'playing') {
       return;
     }
@@ -50,7 +54,6 @@ export function useAI({
     }
 
     isComputingRef.current = true;
-    abortRef.current = false;
     dispatch(setAIThinking(true));
 
     try {
@@ -94,7 +97,7 @@ export function useAI({
         }
       }
     } catch (error) {
-      console.error('AI move computation failed:', error);
+      console.error('[useAI] AI move computation failed:', error);
     } finally {
       isComputingRef.current = false;
       dispatch(setAIThinking(false));
@@ -121,7 +124,11 @@ export function useAI({
 
       return () => {
         clearTimeout(timer);
-        abortRef.current = true;
+        // Only set abort if we haven't started computing yet
+        // Once computing starts, we let it finish
+        if (!isComputingRef.current) {
+          abortRef.current = true;
+        }
       };
     }
   }, [enabled, isAITurn, phase, gameStatus, triggerAIMove]);

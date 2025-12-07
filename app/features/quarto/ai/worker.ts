@@ -82,6 +82,7 @@ export function computeAIMoveAsync(
 
         setTimeout(() => resolve(move), remainingDelay);
       } catch (error) {
+        console.error('[worker] Error computing move:', error);
         reject(error);
       }
     }, 0);
