@@ -5,6 +5,7 @@ import { OrbitControls, Environment, ContactShadows } from '@react-three/drei';
 import {
     Board3D,
     PieceTray,
+    Piece3D,
     GameStatus,
     GameControls
 } from '@/features/quarto/components';
@@ -127,7 +128,32 @@ function QuartoPlayPage() {
             {/* Main game area (board + tray) */}
             <div className='flex flex-1 flex-col'>
                 {/* Board Canvas */}
-                <div className='flex-[7] min-h-0'>
+                <div className='flex-[7] min-h-0 relative'>
+                    {/* Selected piece preview - top right corner */}
+                    {selectedPiece && (
+                        <div className='absolute top-2 right-2 z-10 w-24 h-24 rounded-lg bg-slate-800/80 border border-slate-600'>
+                            <Canvas
+                                camera={{
+                                    position: [0, 0.5, 3],
+                                    fov: 45,
+                                    near: 0.1,
+                                    far: 100
+                                }}
+                            >
+                                <ambientLight intensity={1.0} />
+                                <directionalLight position={[2, 4, 2]} intensity={1.2} />
+                                <Piece3D
+                                    piece={selectedPiece}
+                                    position={[0, -0.5, 0]}
+                                    isSelected={false}
+                                />
+                                <OrbitControls
+                                    enablePan={false}
+                                    enableZoom={false}
+                                />
+                            </Canvas>
+                        </div>
+                    )}
                     <Canvas
                         camera={{
                             position: cameraConfig.board.position,

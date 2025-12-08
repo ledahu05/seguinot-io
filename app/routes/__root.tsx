@@ -1,4 +1,4 @@
-import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-router'
+import { HeadContent, Outlet, Scripts, createRootRoute, useLocation } from '@tanstack/react-router'
 import { Provider as ReduxProvider } from 'react-redux'
 import { ThemeProvider } from '@/components/shared/ThemeProvider'
 import { ThemeToggle } from '@/components/shared/ThemeToggle'
@@ -49,13 +49,18 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
+  const location = useLocation()
+  const hideThemeToggle = location.pathname === '/games/quarto/play'
+
   return (
     <ReduxProvider store={store}>
       <ThemeProvider defaultTheme="dark">
         {/* T075: Fixed header with ThemeToggle */}
-        <header className="fixed right-4 top-4 z-50">
-          <ThemeToggle />
-        </header>
+        {!hideThemeToggle && (
+          <header className="fixed right-4 top-4 z-50">
+            <ThemeToggle />
+          </header>
+        )}
         <Outlet />
       </ThemeProvider>
     </ReduxProvider>
