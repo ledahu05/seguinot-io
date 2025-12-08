@@ -6,6 +6,8 @@
 - TypeScript 5.x, React 19, Node.js 20+ + TanStack Start (full-stack framework), TanStack Router (file-based routing), Tailwind CSS v4, Shadcn UI, Framer Motion, Lucide React, Zod (schema validation) (001-portfolio-site)
 - TypeScript 5.x, React 19, Node.js 20+ + TanStack Start, TanStack Router, Redux Toolkit (RTK), React Three Fiber (R3F), Drei, Framer Motion, React Spring, Zod, Shadcn UI (002-quarto-game)
 - In-memory for local games; server-side session storage for online multiplayer rooms (002-quarto-game)
+- TypeScript 5.x, React 19, Node.js 20+ + TanStack Start, React Three Fiber, Drei, Redux Toolkit, PartyKit, partysocket (002-quarto-game-phase7)
+- In-memory for local/AI games; PartyKit room state for online multiplayer (002-quarto-game-phase7)
 
 ## Recent Changes
 - 001-portfolio-site: Added TypeScript 5.x, React 19, Node.js 20+

@@ -6,16 +6,34 @@ interface CameraConfig {
     fov: number;
 }
 
+interface TrayCamera {
+    position: [number, number, number];
+    target: [number, number, number];
+    fov: number;
+}
+
+interface ResponsiveCameraResult {
+    board: CameraConfig;
+    tray: TrayCamera;
+}
+
 /**
- * Hook that returns responsive camera configuration based on viewport width.
- * Mobile devices get a closer camera with wider FOV for better visibility.
- * Desktop with side panel shifts the view left to compensate for the panel.
+ * Hook that returns responsive camera configurations for board and piece tray.
+ * Board camera: perspective view focused only on the board (tray is in separate viewport).
+ * Tray camera: orthographic top-down view for clear piece selection.
  */
-export function useResponsiveCamera(): CameraConfig {
-    const [config, setConfig] = useState<CameraConfig>({
-        position: [8, 8, 8],
-        target: [0, 0, 0],
-        fov: 45
+export function useResponsiveCamera(): ResponsiveCameraResult {
+    const [config, setConfig] = useState<ResponsiveCameraResult>({
+        board: {
+            position: [6, 12, 6],
+            target: [0, 0, 0],
+            fov: 40
+        },
+        tray: {
+            position: [0, 3, -4], // Negative Z = 180° rotation, tall pieces in back
+            target: [0, 0, 0],
+            fov: 55
+        }
     });
 
     useEffect(() => {
@@ -23,18 +41,32 @@ export function useResponsiveCamera(): CameraConfig {
             const width = window.innerWidth;
 
             if (width < 768) {
-                // Small tablet - still stacked layout
+                // Mobile - board-only view, tray in separate canvas below
                 setConfig({
-                    position: [7, 7, 7],
-                    target: [2.5, 0, 0],
-                    fov: 55
+                    board: {
+                        position: [5, 10, 5],
+                        target: [0, 0, 0],
+                        fov: 45
+                    },
+                    tray: {
+                        position: [0, 4, -6], // Negative Z = 180° rotation
+                        target: [0, 0, 0],
+                        fov: 30
+                    }
                 });
             } else {
-                // Desktop with side panel - shift view left to compensate
+                // Desktop - board centered, tray in separate canvas below
                 setConfig({
-                    position: [10, 5, 10],
-                    target: [2, 0, 0],
-                    fov: 50
+                    board: {
+                        position: [6, 12, 6],
+                        target: [0, 0, 0],
+                        fov: 40
+                    },
+                    tray: {
+                        position: [0, 3, -4], // Negative Z = 180° rotation
+                        target: [0, 0, 0],
+                        fov: 55
+                    }
                 });
             }
         };
