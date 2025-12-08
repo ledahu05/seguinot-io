@@ -142,32 +142,57 @@
 
 ---
 
-## Phase 7: User Story 3 - Play Online Multiplayer (Priority: P3)
+## Phase 7: User Story 3 - Play Online Multiplayer via PartyKit (Priority: P3)
 
-**Goal**: Real-time 2-player game across devices with room management
+**Goal**: Real-time 2-player game across devices using PartyKit for WebSocket infrastructure
 
-**Independent Test**: Two browsers create/join room, play synchronized game, reconnection works
+**Independent Test**: Two browsers create/join room via PartyKit, play synchronized game, reconnection works
 
-### Tests for User Story 3
+**Architecture**: Separate PartyKit server at `/party` directory, deployed to partykit.dev
 
-- [ ] T050 [P] [US3] Contract tests for multiplayer API in tests/contract/quarto/multiplayer.test.ts
+### 7.1 PartyKit Server Setup
 
-### Implementation for User Story 3
+- [ ] T050 [P] [US3] Create `/party` directory structure with package.json, tsconfig.json, partykit.json
+- [ ] T051 [P] [US3] Duplicate types to party/src/types.ts (ClientMessage, ServerMessage, RoomState)
+- [ ] T052 [P] [US3] Copy game logic to party/src/game-logic.ts (win detection, validation)
+- [ ] T053 [US3] Implement QuartoParty class in party/src/quarto.ts with onConnect, onMessage, onClose
+- [ ] T054 [US3] Implement CREATE_ROOM and JOIN_ROOM message handlers
+- [ ] T055 [US3] Implement SELECT_PIECE, PLACE_PIECE, CALL_QUARTO message handlers
+- [ ] T056 [US3] Implement STATE_UPDATE broadcasting to all connections
+- [ ] T057 [US3] Add 2-minute reconnection timer with RECONNECT message support
 
-- [ ] T051 [P] [US3] Implement room creation endpoint in app/server/api/quarto/room.ts
-- [ ] T052 [P] [US3] Implement room join endpoint in app/server/api/quarto/room.ts
-- [ ] T053 [US3] Implement WebSocket connection handler in app/server/api/quarto/websocket.ts
-- [ ] T054 [US3] Implement WebSocket message routing (SELECT_PIECE, PLACE_PIECE, CALL_QUARTO)
-- [ ] T055 [US3] Implement state synchronization (STATE_UPDATE broadcasts)
-- [ ] T056 [US3] Create useMultiplayer hook for WebSocket client in app/features/quarto/hooks/useMultiplayer.ts
-- [ ] T057 [US3] Implement connection status tracking in RTK slice
-- [ ] T058 [US3] Create multiplayer lobby UI in app/routes/games/quarto/lobby.tsx
-- [ ] T059 [US3] Implement room code display and sharing
-- [ ] T060 [US3] Implement player disconnection handling with 2-minute timeout
-- [ ] T061 [US3] Implement reconnection logic with session tokens
-- [ ] T062 [US3] Add forfeit handling when timeout expires
+### 7.2 Client Integration with partysocket
 
-**Checkpoint**: Online multiplayer fully functional with room management and reconnection
+- [ ] T058 [P] [US3] Install partysocket dependency in main app
+- [ ] T059 [P] [US3] Create app/features/quarto/online/ directory structure
+- [ ] T060 [US3] Implement usePartySocket hook in app/features/quarto/online/usePartySocket.ts
+- [ ] T061 [US3] Implement useOnlineGame hook in app/features/quarto/online/useOnlineGame.ts
+- [ ] T062 [US3] Create client message types in app/features/quarto/online/types.ts
+- [ ] T063 [US3] Create online barrel export in app/features/quarto/online/index.ts
+- [ ] T064 [US3] Add connection status and playerId to RTK slice (setConnectionStatus, setOnlineGame)
+- [ ] T065 [US3] Store playerId in sessionStorage for reconnection
+
+### 7.3 UI Updates
+
+- [ ] T066 [US3] Enable online button in app/routes/games/quarto/index.tsx menu
+- [ ] T067 [US3] Create room create/join form component
+- [ ] T068 [US3] Create app/routes/games/quarto/online.tsx lobby route with room code display
+- [ ] T069 [US3] Modify play.tsx to support online mode (use onlineGame state)
+- [ ] T070 [US3] Create ConnectionStatus component showing connection state and room code
+- [ ] T071 [US3] Add waiting screen when host is waiting for guest
+
+### 7.4 Testing & Deployment
+
+- [ ] T072 [P] [US3] Add party:dev script to root package.json ("cd party && npx partykit dev --port 1999")
+- [ ] T073 [P] [US3] Add party:deploy script to root package.json
+- [ ] T074 [US3] Configure VITE_PARTYKIT_HOST environment variable (localhost:1999 for dev)
+- [ ] T075 [US3] Test full flow locally: create room, join room, play game, win/draw
+- [ ] T076 [US3] Test disconnection and reconnection within 2-minute window
+- [ ] T077 [US3] Test forfeit when reconnection timeout expires
+- [ ] T078 [US3] Deploy PartyKit to partykit.dev
+- [ ] T079 [US3] Configure VITE_PARTYKIT_HOST in Vercel production environment
+
+**Checkpoint**: Online multiplayer fully functional via PartyKit with room management and reconnection
 
 ---
 
@@ -288,9 +313,9 @@ Phases 1-5 (MVP): ~39 tasks
 | 4 | US5 (Selection) | 6 | 2 |
 | 5 | US1 (Local Game) | 11 | 1 |
 | 6 | US2 (AI) | 10 | 2 |
-| 7 | US3 (Online) | 13 | 2 |
+| 7 | US3 (Online via PartyKit) | 30 | 6 |
 | 8 | Polish | 11 | 6 |
-| **Total** | | **73** | **23** |
+| **Total** | | **90** | **27** |
 
 ---
 
@@ -302,3 +327,5 @@ Phases 1-5 (MVP): ~39 tasks
 - Tests follow TDD: write first, verify failure, then implement
 - Commit after each task or logical group
 - Stop at any phase checkpoint to validate independently
+- Phase 7 uses PartyKit (separate `/party` directory) per constitution requirement
+- PartyKit deployment is to partykit.dev, separate from Vercel

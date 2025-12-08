@@ -1,6 +1,6 @@
 import { useRef, useMemo } from 'react';
 import { useSpring, animated } from '@react-spring/three';
-import { Cylinder, Box, Sphere } from '@react-three/drei';
+import { Cylinder, Box, Sphere, Torus } from '@react-three/drei';
 import * as THREE from 'three';
 import type { Piece } from '../types/quarto.types';
 
@@ -26,7 +26,13 @@ const HOVER_EMISSIVE = '#444444';
 const BASE_RADIUS = 0.35;
 const SHORT_HEIGHT = 0.6;
 const TALL_HEIGHT = 1.0;
-const HOLLOW_DEPTH = 0.2;
+const HOLLOW_DEPTH = 0.5;       // Deep cavity for obvious hollow effect
+const HOLLOW_RADIUS_MULT = 0.8; // Wider opening (was 0.6)
+const HOLLOW_COLOR_MULT = 0.35; // Darker interior (was 0.6)
+
+// Ring constants for tall pieces
+const RING_INNER_RADIUS = BASE_RADIUS + 0.02;
+const RING_TUBE_RADIUS = 0.03;
 
 export function Piece3D({
   piece,
@@ -75,10 +81,47 @@ export function Piece3D({
     );
   }, [color, isSelected, isHovered, isFocused]);
 
+  // Hollow interior material
+  const hollowMaterial = useMemo(() => {
+    return (
+      <meshStandardMaterial
+        color={new THREE.Color(color).multiplyScalar(HOLLOW_COLOR_MULT).getStyle()}
+        roughness={0.9}
+        metalness={0.0}
+      />
+    );
+  }, [color]);
+
+  // Render decorative rings for tall pieces
+  const renderTallRings = () => {
+    if (piece.height !== 'tall') return null;
+
+    return (
+      <>
+        <Torus
+          args={[RING_INNER_RADIUS, RING_TUBE_RADIUS, 8, 32]}
+          position={[0, height * 0.33, 0]}
+          rotation={[Math.PI / 2, 0, 0]}
+        >
+          {material}
+        </Torus>
+        <Torus
+          args={[RING_INNER_RADIUS, RING_TUBE_RADIUS, 8, 32]}
+          position={[0, height * 0.66, 0]}
+          rotation={[Math.PI / 2, 0, 0]}
+        >
+          {material}
+        </Torus>
+      </>
+    );
+  };
+
   // Render the piece geometry based on attributes
   const renderPieceGeometry = () => {
     if (isRound) {
       // Cylindrical piece
+      const hollowRadius = BASE_RADIUS * HOLLOW_RADIUS_MULT;
+
       return (
         <group>
           {/* Main cylinder body */}
@@ -86,17 +129,13 @@ export function Piece3D({
             {material}
           </Cylinder>
 
-          {/* Hollow top (indentation) */}
+          {/* Hollow top (deep cup-like indentation) */}
           {isHollow && (
             <Cylinder
-              args={[BASE_RADIUS * 0.6, BASE_RADIUS * 0.6, HOLLOW_DEPTH, 32]}
+              args={[hollowRadius, hollowRadius, HOLLOW_DEPTH, 32]}
               position={[0, height - HOLLOW_DEPTH / 2 + 0.01, 0]}
             >
-              <meshStandardMaterial
-                color={new THREE.Color(color).multiplyScalar(0.6).getStyle()}
-                roughness={0.8}
-                metalness={0.05}
-              />
+              {hollowMaterial}
             </Cylinder>
           )}
 
@@ -109,11 +148,15 @@ export function Piece3D({
               {material}
             </Sphere>
           )}
+
+          {/* Decorative rings for tall pieces */}
+          {renderTallRings()}
         </group>
       );
     } else {
       // Square/rectangular piece
       const size = BASE_RADIUS * 1.6;
+      const hollowSize = size * HOLLOW_RADIUS_MULT;
 
       return (
         <group>
@@ -122,17 +165,13 @@ export function Piece3D({
             {material}
           </Box>
 
-          {/* Hollow top (square indentation) */}
+          {/* Hollow top (deep square indentation) */}
           {isHollow && (
             <Box
-              args={[size * 0.6, HOLLOW_DEPTH, size * 0.6]}
+              args={[hollowSize, HOLLOW_DEPTH, hollowSize]}
               position={[0, height - HOLLOW_DEPTH / 2 + 0.01, 0]}
             >
-              <meshStandardMaterial
-                color={new THREE.Color(color).multiplyScalar(0.6).getStyle()}
-                roughness={0.8}
-                metalness={0.05}
-              />
+              {hollowMaterial}
             </Box>
           )}
 
@@ -142,6 +181,9 @@ export function Piece3D({
               {material}
             </Box>
           )}
+
+          {/* Decorative rings for tall pieces */}
+          {renderTallRings()}
         </group>
       );
     }

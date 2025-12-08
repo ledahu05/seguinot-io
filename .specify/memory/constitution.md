@@ -1,10 +1,9 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 1.1.0 → 1.1.1
+Version Change: 1.1.1 → 1.2.0
 Modified Principles:
-  - V. Performance: Expanded with additional performance requirements (bundle size limits,
-    code splitting, font optimization, critical CSS, performance testing)
+  - II. Tech Stack: Added PartyKit for real-time multiplayer WebSocket infrastructure
 Added Sections: None
 Removed Sections: None
 Templates Requiring Updates:
@@ -29,7 +28,7 @@ Follow SOLID principles. Use Feature-Sliced Design (FSD) or a clean modular fold
 
 ### II. Tech Stack
 
-Use React 19, TypeScript, TanStack Start, and Tailwind CSS. State management via Redux Toolkit (RTK) only when necessary.
+Use React 19, TypeScript, TanStack Start, and Tailwind CSS. State management via Redux Toolkit (RTK) only when necessary. Real-time multiplayer via PartyKit.
 
 - React 19 with functional components and hooks MUST be used
 - TypeScript strict mode MUST be enabled
@@ -37,6 +36,9 @@ Use React 19, TypeScript, TanStack Start, and Tailwind CSS. State management via
 - TanStack Router file-based routing conventions MUST be followed
 - Tailwind CSS MUST be used for styling
 - RTK MUST only be introduced when local state or context is insufficient
+- PartyKit MUST be used for real-time WebSocket multiplayer features
+- PartyKit server code MUST be in a separate `/party` directory at project root
+- `partysocket` client library MUST be used for WebSocket connections to PartyKit
 
 ### III. Testing First
 
@@ -162,4 +164,4 @@ This constitution supersedes all other development practices for this project. A
 - Violations MUST be justified in the Complexity Tracking section of the implementation plan
 - Constitution checks are required gates in the planning phase
 
-**Version**: 1.1.1 | **Ratified**: 2025-12-03 | **Last Amended**: 2025-12-03
+**Version**: 1.2.0 | **Ratified**: 2025-12-03 | **Last Amended**: 2025-12-07

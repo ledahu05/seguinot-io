@@ -123,71 +123,104 @@ function QuartoPlayPage() {
     };
 
     return (
-        <div className='flex min-h-screen justify-between flex-col bg-slate-900 md:flex-row'>
-            {/* 3D Canvas */}
-            <div className='h-[50vh] min-h-[300px] w-full md:h-screen md:min-h-0 md:flex-1'>
-                <Canvas
-                    camera={{
-                        position: cameraConfig.position,
-                        fov: cameraConfig.fov,
-                        near: 0.1,
-                        far: 100
-                    }}
-                    shadows
-                >
-                    <Suspense fallback={null}>
-                        {/* Lighting */}
-                        <ambientLight intensity={0.4} />
-                        <directionalLight
-                            position={[10, 15, 10]}
-                            intensity={1}
-                            castShadow
-                            shadow-mapSize={[2048, 2048]}
-                        />
-                        <pointLight position={[-10, 10, -10]} intensity={0.3} />
+        <div className='flex h-screen flex-col bg-slate-900 md:flex-row'>
+            {/* Main game area (board + tray) */}
+            <div className='flex flex-1 flex-col'>
+                {/* Board Canvas */}
+                <div className='flex-[7] min-h-0'>
+                    <Canvas
+                        camera={{
+                            position: cameraConfig.board.position,
+                            fov: cameraConfig.board.fov,
+                            near: 0.1,
+                            far: 100
+                        }}
+                        shadows
+                    >
+                        <Suspense fallback={null}>
+                            {/* Lighting */}
+                            <ambientLight intensity={0.4} />
+                            <directionalLight
+                                position={[10, 15, 10]}
+                                intensity={1}
+                                castShadow
+                                shadow-mapSize={[2048, 2048]}
+                            />
+                            <pointLight position={[-10, 10, -10]} intensity={0.3} />
 
-                        {/* Environment */}
-                        <Environment preset='studio' />
+                            {/* Environment */}
+                            <Environment preset='studio' />
 
-                        {/* Board */}
-                        <Board3D
-                            board={board ?? createEmptyBoard()}
-                            onPositionClick={handlePositionClick}
-                            onPositionHover={hoverPosition}
-                            hoveredPosition={hoveredPosition}
-                            focusedPosition={isKeyboardActive ? focusedBoardPosition : null}
-                            winningLine={winningPositions}
-                        />
+                            {/* Board */}
+                            <Board3D
+                                board={board ?? createEmptyBoard()}
+                                onPositionClick={handlePositionClick}
+                                onPositionHover={hoverPosition}
+                                hoveredPosition={hoveredPosition}
+                                focusedPosition={isKeyboardActive ? focusedBoardPosition : null}
+                                winningLine={winningPositions}
+                            />
 
-                        {/* Piece Tray */}
-                        <PieceTray
-                            availablePieces={availablePieces}
-                            selectedPieceId={selectedPiece?.id}
-                            onPieceSelect={handlePieceSelect}
-                            disabled={phase !== 'selecting' || isAIThinking}
-                            focusedIndex={isKeyboardActive ? focusedPieceIndex : null}
-                        />
+                            {/* Shadows */}
+                            <ContactShadows
+                                position={[0, -0.2, 0]}
+                                opacity={0.5}
+                                scale={10}
+                                blur={2}
+                                far={4}
+                            />
 
-                        {/* Shadows */}
-                        <ContactShadows
-                            position={[0, -0.2, 0]}
-                            opacity={0.5}
-                            scale={15}
-                            blur={2}
-                            far={4}
-                        />
+                            {/* Camera Controls */}
+                            <OrbitControls
+                                enablePan={false}
+                                minDistance={4}
+                                maxDistance={20}
+                                minPolarAngle={Math.PI / 6}
+                                maxPolarAngle={Math.PI / 2.5}
+                                target={cameraConfig.board.target}
+                            />
+                        </Suspense>
+                    </Canvas>
+                </div>
 
-                        {/* Camera Controls */}
-                        <OrbitControls
-                            enablePan={false}
-                            minDistance={4}
-                            maxDistance={20}
-                            minPolarAngle={Math.PI / 6}
-                            maxPolarAngle={Math.PI / 2.5}
-                            target={cameraConfig.target}
-                        />
-                    </Suspense>
-                </Canvas>
+                {/* Piece Tray Canvas - perspective angled view */}
+                <div className='flex-[3] min-h-0 border-t border-slate-700 bg-slate-800/50'>
+                    <Canvas
+                        camera={{
+                            position: cameraConfig.tray.position,
+                            fov: cameraConfig.tray.fov,
+                            near: 0.1,
+                            far: 100
+                        }}
+                    >
+                        <Suspense fallback={null}>
+                            {/* Lighting for tray */}
+                            <ambientLight intensity={0.6} />
+                            <directionalLight
+                                position={[0, 10, 5]}
+                                intensity={0.8}
+                            />
+
+                            {/* Piece Tray */}
+                            <PieceTray
+                                availablePieces={availablePieces}
+                                selectedPieceId={selectedPiece?.id}
+                                onPieceSelect={handlePieceSelect}
+                                disabled={phase !== 'selecting' || isAIThinking}
+                                focusedIndex={isKeyboardActive ? focusedPieceIndex : null}
+                                layout='bottom'
+                            />
+
+                            {/* Camera Controls for tray */}
+                            <OrbitControls
+                                enablePan={false}
+                                minDistance={4}
+                                maxDistance={15}
+                                target={cameraConfig.tray.target}
+                            />
+                        </Suspense>
+                    </Canvas>
+                </div>
             </div>
 
             {/* Side Panel */}

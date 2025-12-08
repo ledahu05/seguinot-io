@@ -82,38 +82,68 @@
 
 ---
 
-### 4. Real-time Multiplayer: WebSocket via TanStack Start
+### 4. Real-time Multiplayer: PartyKit
 
-**Decision**: Use native WebSocket with TanStack Start server functions.
+**Decision**: Use PartyKit for real-time WebSocket multiplayer.
 
 **Rationale**:
-- TanStack Start supports server-side WebSocket handlers
-- Simple protocol for turn-based game (no complex sync needed)
-- Direct integration with existing stack
-- Low latency for move synchronization
+- Managed WebSocket infrastructure with built-in room management
+- Separate deployment from Vercel (avoids serverless connection limits)
+- Free Individual tier sufficient for portfolio project
+- Simple API with `partysocket` client library
+- Constitution mandates PartyKit for multiplayer features
 
 **Alternatives Considered**:
+- **Raw WebSocket via TanStack Start**: Serverless limitations, connection management complexity
 - **Socket.io**: Additional dependency, more features than needed
 - **Polling**: Would not meet <1s sync requirement
 - **WebRTC**: Overkill for turn-based game, NAT traversal complexity
+- **Supabase Realtime**: More complex setup, database-centric
 
 **Best Practices**:
-- Use room-based architecture (one WS connection per game session)
-- Implement heartbeat for connection monitoring
-- Store room state server-side with short TTL
-- Handle reconnection with session tokens
+- Separate `/party` directory at project root
+- Duplicate types between client and server (simpler than shared packages)
+- Use PartyKit room ID as the shareable game code
+- Store room state in Party class instance
+- Handle reconnection with session storage
+
+**Architecture**:
+```
+Browser → partysocket → PartyKit Server (partykit.dev)
+                              ↓
+                        QuartoParty class
+                              ↓
+                    - Game state management
+                    - Move validation
+                    - State broadcasting
+```
 
 **Message Protocol**:
 ```typescript
-type WSMessage =
-  | { type: 'JOIN'; roomId: string; playerId: string }
+// Client → Server
+type ClientMessage =
+  | { type: 'CREATE_ROOM'; playerName: string }
+  | { type: 'JOIN_ROOM'; playerName: string }
   | { type: 'SELECT_PIECE'; pieceId: number }
   | { type: 'PLACE_PIECE'; position: number }
   | { type: 'CALL_QUARTO' }
-  | { type: 'STATE_UPDATE'; state: GameState }
-  | { type: 'PLAYER_LEFT'; playerId: string }
-  | { type: 'ERROR'; message: string }
+  | { type: 'LEAVE_ROOM' }
+  | { type: 'RECONNECT'; playerId: string };
+
+// Server → Client
+type ServerMessage =
+  | { type: 'ROOM_CREATED'; roomId: string; playerId: string }
+  | { type: 'ROOM_JOINED'; playerId: string; game: Game }
+  | { type: 'PLAYER_JOINED'; playerName: string; game: Game }
+  | { type: 'STATE_UPDATE'; game: Game }
+  | { type: 'PLAYER_LEFT'; reason: 'disconnect' | 'forfeit' | 'timeout' }
+  | { type: 'ERROR'; code: string; message: string }
+  | { type: 'GAME_OVER'; winner: 0 | 1 | 'draw'; game: Game };
 ```
+
+**Deployment**:
+- PartyKit deployed to: `quarto-multiplayer.<username>.partykit.dev`
+- Environment variable: `VITE_PARTYKIT_HOST`
 
 ---
 

@@ -1,169 +1,72 @@
 # API Contracts: Quarto Board Game
 
 **Feature**: 002-quarto-game
-**Date**: 2025-12-05
+**Date**: 2025-12-07 (Updated for PartyKit)
 
 ## Overview
 
-The Quarto game uses a hybrid API approach:
-- **REST endpoints** for room management (create, join, leave)
-- **WebSocket** for real-time game state synchronization
+The Quarto game uses **PartyKit** for all multiplayer functionality. Unlike traditional REST+WebSocket architectures, PartyKit handles room creation, joining, and game state entirely through WebSocket messages.
 
-Base path: `/api/games/quarto`
+**Architecture**:
+- Client connects directly to PartyKit server at `<PARTYKIT_HOST>/party/<roomId>`
+- Room creation happens by connecting to a new room ID
+- No separate REST API needed
 
-## REST Endpoints
-
-### Create Room
-
-Creates a new multiplayer game room.
-
-```
-POST /api/games/quarto/rooms
-```
-
-**Request Body**:
-```json
-{
-  "playerName": "string (1-20 chars)"
-}
-```
-
-**Response 201**:
-```json
-{
-  "roomId": "ABC123",
-  "gameId": "uuid",
-  "playerId": "uuid",
-  "wsUrl": "/api/games/quarto/ws/ABC123"
-}
-```
-
-**Response 400**:
-```json
-{
-  "error": "INVALID_NAME",
-  "message": "Player name must be 1-20 characters"
-}
-```
+**Environment Variable**:
+- `VITE_PARTYKIT_HOST` - PartyKit server host (e.g., `localhost:1999` or `quarto-multiplayer.<user>.partykit.dev`)
 
 ---
 
-### Join Room
+## PartyKit Connection
 
-Joins an existing game room as the second player.
+### Connection URL
 
 ```
-POST /api/games/quarto/rooms/:roomId/join
+wss://<PARTYKIT_HOST>/party/<roomId>
 ```
 
-**Path Parameters**:
-- `roomId`: 6-character room code
+**Parameters**:
+- `roomId`: 6-character alphanumeric room code (e.g., `A3B7KP`)
 
-**Request Body**:
-```json
-{
-  "playerName": "string (1-20 chars)"
-}
-```
+### Connection Flow
 
-**Response 200**:
-```json
-{
-  "roomId": "ABC123",
-  "gameId": "uuid",
-  "playerId": "uuid",
-  "wsUrl": "/api/games/quarto/ws/ABC123"
-}
-```
+**Creating a Room (Host)**:
+1. Generate a random 6-character room code client-side
+2. Connect to `wss://<host>/party/<roomId>`
+3. Send `CREATE_ROOM` message with player name
+4. Receive `ROOM_CREATED` with assigned `playerId`
+5. Share room code with opponent
 
-**Response 404**:
-```json
-{
-  "error": "ROOM_NOT_FOUND",
-  "message": "Room ABC123 does not exist or has expired"
-}
-```
-
-**Response 409**:
-```json
-{
-  "error": "ROOM_FULL",
-  "message": "Room already has two players"
-}
-```
+**Joining a Room (Guest)**:
+1. Connect to `wss://<host>/party/<roomId>` (code from host)
+2. Send `JOIN_ROOM` message with player name
+3. Receive `ROOM_JOINED` with `playerId` and initial game state
+4. Host receives `PLAYER_JOINED` notification
+5. Both receive `STATE_UPDATE` to begin game
 
 ---
 
-### Get Room Status
-
-Gets current room status (for reconnection).
-
-```
-GET /api/games/quarto/rooms/:roomId
-```
-
-**Response 200**:
-```json
-{
-  "roomId": "ABC123",
-  "gameId": "uuid",
-  "hostName": "Player 1",
-  "guestName": "Player 2 | null",
-  "status": "waiting | playing | finished",
-  "createdAt": 1701792000000
-}
-```
-
----
-
-### Leave Room
-
-Player voluntarily leaves room (forfeit if game in progress).
-
-```
-POST /api/games/quarto/rooms/:roomId/leave
-```
-
-**Request Body**:
-```json
-{
-  "playerId": "uuid"
-}
-```
-
-**Response 200**:
-```json
-{
-  "success": true
-}
-```
-
----
-
-## WebSocket Protocol
-
-### Connection
-
-```
-WebSocket /api/games/quarto/ws/:roomId?playerId={playerId}
-```
-
-**Query Parameters**:
-- `playerId`: UUID received from create/join response
-
-**Connection Handshake**:
-1. Client connects with playerId
-2. Server validates player belongs to room
-3. Server sends `CONNECTED` message
-4. Server sends current `STATE_UPDATE`
-
----
-
-### Message Types
+## Message Types
 
 All messages are JSON with a `type` field.
 
-#### Client → Server
+### Client → Server
+
+**CREATE_ROOM**: Host creates a new game room
+```json
+{
+  "type": "CREATE_ROOM",
+  "playerName": "string (1-20 chars)"
+}
+```
+
+**JOIN_ROOM**: Guest joins existing room
+```json
+{
+  "type": "JOIN_ROOM",
+  "playerName": "string (1-20 chars)"
+}
+```
 
 **SELECT_PIECE**: Player selects a piece to give opponent
 ```json
@@ -188,34 +91,60 @@ All messages are JSON with a `type` field.
 }
 ```
 
-**PING**: Keep-alive (every 30s)
+**LEAVE_ROOM**: Player voluntarily leaves (forfeit if game in progress)
 ```json
 {
-  "type": "PING"
+  "type": "LEAVE_ROOM"
+}
+```
+
+**RECONNECT**: Player reconnects after disconnect
+```json
+{
+  "type": "RECONNECT",
+  "playerId": "uuid"
 }
 ```
 
 ---
 
-#### Server → Client
+### Server → Client
 
-**CONNECTED**: Connection confirmed
+**ROOM_CREATED**: Room successfully created (sent to host)
 ```json
 {
-  "type": "CONNECTED",
-  "playerId": "uuid",
-  "playerIndex": 0 | 1
+  "type": "ROOM_CREATED",
+  "roomId": "A3B7KP",
+  "playerId": "uuid"
 }
 ```
 
-**STATE_UPDATE**: Full game state (sent after every move)
+**ROOM_JOINED**: Successfully joined room (sent to guest)
+```json
+{
+  "type": "ROOM_JOINED",
+  "playerId": "uuid",
+  "game": { /* Game object */ }
+}
+```
+
+**PLAYER_JOINED**: Opponent joined the room (sent to host)
+```json
+{
+  "type": "PLAYER_JOINED",
+  "playerName": "string",
+  "game": { /* Game object */ }
+}
+```
+
+**STATE_UPDATE**: Game state after every move
 ```json
 {
   "type": "STATE_UPDATE",
   "game": {
     "id": "uuid",
     "mode": "online",
-    "status": "playing",
+    "status": "waiting" | "playing" | "finished",
     "players": [
       { "id": "uuid", "type": "human-remote", "name": "Player 1" },
       { "id": "uuid", "type": "human-remote", "name": "Player 2" }
@@ -228,24 +157,18 @@ All messages are JSON with a `type` field.
     "phase": "selecting" | "placing",
     "selectedPiece": null | 0-15,
     "winner": null | 0 | 1 | "draw",
-    "winningLine": null | [0, 5, 10, 15]
+    "winningLine": null | [0, 5, 10, 15],
+    "history": [],
+    "createdAt": 1701792000000,
+    "updatedAt": 1701792000000
   }
 }
 ```
 
-**PLAYER_JOINED**: Opponent joined (sent to host)
-```json
-{
-  "type": "PLAYER_JOINED",
-  "playerName": "string"
-}
-```
-
-**PLAYER_LEFT**: Opponent disconnected
+**PLAYER_LEFT**: Opponent disconnected or left
 ```json
 {
   "type": "PLAYER_LEFT",
-  "playerId": "uuid",
   "reason": "disconnect" | "forfeit" | "timeout"
 }
 ```
@@ -255,30 +178,22 @@ All messages are JSON with a `type` field.
 {
   "type": "GAME_OVER",
   "winner": 0 | 1 | "draw",
-  "reason": "quarto" | "draw" | "forfeit" | "timeout",
-  "winningLine": [0, 5, 10, 15] | null
+  "game": { /* Final game state */ }
 }
 ```
 
-**ERROR**: Invalid action
+**ERROR**: Invalid action or error condition
 ```json
 {
   "type": "ERROR",
-  "code": "NOT_YOUR_TURN" | "INVALID_PIECE" | "INVALID_POSITION" | "NO_QUARTO",
+  "code": "NOT_YOUR_TURN" | "INVALID_PIECE" | "INVALID_POSITION" | "NO_QUARTO" | "ROOM_FULL" | "ROOM_NOT_FOUND",
   "message": "Human readable error"
-}
-```
-
-**PONG**: Keep-alive response
-```json
-{
-  "type": "PONG"
 }
 ```
 
 ---
 
-### Error Codes
+## Error Codes
 
 | Code | Description |
 |------|-------------|
@@ -288,15 +203,17 @@ All messages are JSON with a `type` field.
 | `WRONG_PHASE` | SELECT_PIECE during placing phase or vice versa |
 | `NO_QUARTO` | Called Quarto but no winning alignment exists |
 | `GAME_ENDED` | Action attempted after game finished |
-| `UNAUTHORIZED` | PlayerId doesn't match room participants |
+| `ROOM_FULL` | Attempted to join room that already has two players |
+| `ROOM_NOT_FOUND` | Room ID does not exist or has expired |
 
 ---
 
 ## Validation Rules
 
-### Room Creation
+### Room Management
 - Player name: 1-20 characters, trimmed
-- Room ID: Auto-generated 6 uppercase alphanumeric
+- Room ID: 6 uppercase alphanumeric characters (client-generated)
+- Only first two connections to a room are accepted
 
 ### Game Moves
 - SELECT_PIECE: Must be current player, selecting phase, piece must be available
@@ -304,6 +221,87 @@ All messages are JSON with a `type` field.
 - CALL_QUARTO: Must be current player's turn, valid winning alignment must exist
 
 ### Timeouts
-- Room expires: 30 minutes of inactivity (no WS connections)
+- Room expires: 30 minutes of inactivity (no connections)
 - Turn timeout: None (players can take unlimited time)
 - Reconnection window: 2 minutes after disconnect
+- Forfeit: Automatic win for remaining player after reconnection timeout
+
+---
+
+## PartyKit Server Implementation
+
+### Room State Structure
+
+```typescript
+interface RoomState {
+  game: Game;
+  hostPlayerId: string;
+  guestPlayerId: string | null;
+  connections: Map<string, { connectionId: string; playerId: string }>;
+  disconnectedPlayers: Map<string, { playerId: string; disconnectTime: number }>;
+}
+```
+
+### Party Class Lifecycle
+
+```typescript
+export default class QuartoParty implements Party.Server {
+  state: RoomState | null = null;
+
+  onConnect(conn: Party.Connection) {
+    // Track new connection
+    // If reconnecting, restore player session
+  }
+
+  onMessage(message: string, sender: Party.Connection) {
+    // Parse message type
+    // Validate action is legal
+    // Update game state
+    // Broadcast STATE_UPDATE to all connections
+  }
+
+  onClose(conn: Party.Connection) {
+    // Mark player as disconnected
+    // Start 2-minute reconnection timer
+    // If timer expires, forfeit game
+  }
+}
+```
+
+---
+
+## Client Integration
+
+### Using partysocket
+
+```typescript
+import PartySocket from 'partysocket';
+
+const socket = new PartySocket({
+  host: import.meta.env.VITE_PARTYKIT_HOST,
+  room: roomId,
+});
+
+socket.addEventListener('message', (event) => {
+  const message = JSON.parse(event.data);
+  // Handle message by type
+});
+
+socket.send(JSON.stringify({
+  type: 'CREATE_ROOM',
+  playerName: 'Player 1'
+}));
+```
+
+### Reconnection
+
+The `partysocket` library automatically handles reconnection. On reconnect, send:
+
+```json
+{
+  "type": "RECONNECT",
+  "playerId": "<stored-player-id>"
+}
+```
+
+Store `playerId` in `sessionStorage` for reconnection capability.
