@@ -4,6 +4,12 @@ import { createEmptyBoard, findWinningLine, isBoardFull } from '../utils/winDete
 
 const initialState: QuartoState = {
   game: null,
+  online: {
+    roomId: null,
+    playerId: null,
+    playerIndex: null,
+    isHost: false,
+  },
   ui: {
     selectedPosition: null,
     hoveredPosition: null,
@@ -254,6 +260,29 @@ const quartoSlice = createSlice({
       state.ui.connectionStatus = action.payload;
     },
 
+    setOnlineRoom(
+      state,
+      action: PayloadAction<{
+        roomId: string;
+        playerId: string;
+        playerIndex: 0 | 1;
+        isHost: boolean;
+      }>
+    ) {
+      state.online = action.payload;
+    },
+
+    clearOnlineRoom(state) {
+      state.online = {
+        roomId: null,
+        playerId: null,
+        playerIndex: null,
+        isHost: false,
+      };
+      state.ui.connectionStatus = 'disconnected';
+      state.ui.error = null;
+    },
+
     handlePlayerLeft(
       state,
       action: PayloadAction<{ reason: 'disconnect' | 'forfeit' | 'timeout' }>
@@ -293,6 +322,8 @@ export const {
   setAIThinking,
   applyAIMove,
   setConnectionStatus,
+  setOnlineRoom,
+  clearOnlineRoom,
   handlePlayerLeft,
   setSelectedPosition,
   setHoveredPosition,

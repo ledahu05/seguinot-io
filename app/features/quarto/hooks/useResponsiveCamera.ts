@@ -25,7 +25,7 @@ interface ResponsiveCameraResult {
 export function useResponsiveCamera(): ResponsiveCameraResult {
     const [config, setConfig] = useState<ResponsiveCameraResult>({
         board: {
-            position: [6, 12, 6],
+            position: [-7.8, 3.5, 7.5],
             target: [0, 0, 0],
             fov: 40
         },
@@ -44,9 +44,9 @@ export function useResponsiveCamera(): ResponsiveCameraResult {
                 // Mobile - board-only view, tray in separate canvas below
                 setConfig({
                     board: {
-                        position: [5, 10, 5],
+                        position: [-6.7, 3.0, 6.4],
                         target: [0, 0, 0],
-                        fov: 45
+                        fov: 40
                     },
                     tray: {
                         position: [0, 4, -6], // Negative Z = 180° rotation
@@ -58,7 +58,7 @@ export function useResponsiveCamera(): ResponsiveCameraResult {
                 // Desktop - board centered, tray in separate canvas below
                 setConfig({
                     board: {
-                        position: [6, 12, 6],
+                        position: [-7.8, 3.5, 7.5],
                         target: [0, 0, 0],
                         fov: 40
                     },

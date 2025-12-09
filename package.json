@@ -12,7 +12,10 @@
     "test:coverage": "vitest --coverage",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "party:dev": "cd party && npx partykit dev --port 1999",
+    "party:deploy": "cd party && npx partykit deploy",
+    "dev:all": "npm run party:dev & npm run dev"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -33,6 +36,7 @@
     "framer-motion": "^12.23.25",
     "lucide-react": "^0.544.0",
     "nitro": "latest",
+    "partysocket": "^1.1.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-redux": "^9.2.0",

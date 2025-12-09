@@ -1,6 +1,6 @@
 import { useRef, useMemo } from 'react';
 import { useSpring, animated } from '@react-spring/three';
-import { Cylinder, Box, Sphere, Torus } from '@react-three/drei';
+import { Cylinder, Box, Sphere, Torus, Ring } from '@react-three/drei';
 import * as THREE from 'three';
 import type { Piece } from '../types/quarto.types';
 
@@ -26,7 +26,7 @@ const HOVER_EMISSIVE = '#444444';
 const BASE_RADIUS = 0.35;
 const SHORT_HEIGHT = 0.6;
 const TALL_HEIGHT = 1.0;
-const HOLLOW_DEPTH = 0.5;       // Deep cavity for obvious hollow effect
+const HOLLOW_DEPTH_RATIO = 0.7; // Hollow depth as ratio of piece height
 const HOLLOW_RADIUS_MULT = 0.8; // Wider opening (was 0.6)
 const HOLLOW_COLOR_MULT = 0.35; // Darker interior (was 0.6)
 
@@ -120,7 +120,66 @@ export function Piece3D({
   const renderPieceGeometry = () => {
     if (isRound) {
       // Cylindrical piece
-      const hollowRadius = BASE_RADIUS * HOLLOW_RADIUS_MULT;
+      const innerRadius = BASE_RADIUS * HOLLOW_RADIUS_MULT;
+      const hollowDepth = height * HOLLOW_DEPTH_RATIO;
+      const wallThickness = BASE_RADIUS - innerRadius;
+      const solidBaseHeight = height - hollowDepth;
+
+      if (isHollow) {
+        return (
+          <group>
+            {/* Solid base cylinder (bottom part) */}
+            <Cylinder
+              args={[BASE_RADIUS, BASE_RADIUS, solidBaseHeight, 32]}
+              position={[0, solidBaseHeight / 2, 0]}
+            >
+              {material}
+            </Cylinder>
+
+            {/* Outer wall of hollow section */}
+            <Cylinder
+              args={[BASE_RADIUS, BASE_RADIUS, hollowDepth, 32, 1, true]}
+              position={[0, solidBaseHeight + hollowDepth / 2, 0]}
+            >
+              {material}
+            </Cylinder>
+
+            {/* Inner wall of hollow section (backside visible) */}
+            <Cylinder
+              args={[innerRadius, innerRadius, hollowDepth, 32, 1, true]}
+              position={[0, solidBaseHeight + hollowDepth / 2, 0]}
+            >
+              <meshStandardMaterial
+                color={new THREE.Color(color).multiplyScalar(HOLLOW_COLOR_MULT).getStyle()}
+                roughness={0.9}
+                metalness={0}
+                side={THREE.BackSide}
+              />
+            </Cylinder>
+
+            {/* Top rim ring */}
+            <Ring
+              args={[innerRadius, BASE_RADIUS, 32]}
+              position={[0, solidBaseHeight + hollowDepth, 0]}
+              rotation={[-Math.PI / 2, 0, 0]}
+            >
+              {material}
+            </Ring>
+
+            {/* Bottom of the hollow (floor) */}
+            <Ring
+              args={[0, innerRadius, 32]}
+              position={[0, solidBaseHeight + 0.001, 0]}
+              rotation={[-Math.PI / 2, 0, 0]}
+            >
+              {hollowMaterial}
+            </Ring>
+
+            {/* Decorative rings for tall pieces */}
+            {renderTallRings()}
+          </group>
+        );
+      }
 
       return (
         <group>
@@ -129,25 +188,13 @@ export function Piece3D({
             {material}
           </Cylinder>
 
-          {/* Hollow top (deep cup-like indentation) */}
-          {isHollow && (
-            <Cylinder
-              args={[hollowRadius, hollowRadius, HOLLOW_DEPTH, 32]}
-              position={[0, height - HOLLOW_DEPTH / 2 + 0.01, 0]}
-            >
-              {hollowMaterial}
-            </Cylinder>
-          )}
-
           {/* Solid top (dome) */}
-          {!isHollow && (
-            <Sphere
-              args={[BASE_RADIUS, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2]}
-              position={[0, height, 0]}
-            >
-              {material}
-            </Sphere>
-          )}
+          <Sphere
+            args={[BASE_RADIUS, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2]}
+            position={[0, height, 0]}
+          >
+            {material}
+          </Sphere>
 
           {/* Decorative rings for tall pieces */}
           {renderTallRings()}
@@ -156,7 +203,65 @@ export function Piece3D({
     } else {
       // Square/rectangular piece
       const size = BASE_RADIUS * 1.6;
-      const hollowSize = size * HOLLOW_RADIUS_MULT;
+      const innerSize = size * HOLLOW_RADIUS_MULT;
+      const hollowDepth = height * HOLLOW_DEPTH_RATIO;
+      const wallThickness = (size - innerSize) / 2;
+      const solidBaseHeight = height - hollowDepth;
+
+      if (isHollow) {
+        return (
+          <group>
+            {/* Solid base box (bottom part) */}
+            <Box
+              args={[size, solidBaseHeight, size]}
+              position={[0, solidBaseHeight / 2, 0]}
+            >
+              {material}
+            </Box>
+
+            {/* Four walls for the hollow top */}
+            {/* Front wall */}
+            <Box
+              args={[size, hollowDepth, wallThickness]}
+              position={[0, solidBaseHeight + hollowDepth / 2, (size - wallThickness) / 2]}
+            >
+              {material}
+            </Box>
+            {/* Back wall */}
+            <Box
+              args={[size, hollowDepth, wallThickness]}
+              position={[0, solidBaseHeight + hollowDepth / 2, -(size - wallThickness) / 2]}
+            >
+              {material}
+            </Box>
+            {/* Left wall */}
+            <Box
+              args={[wallThickness, hollowDepth, innerSize]}
+              position={[-(size - wallThickness) / 2, solidBaseHeight + hollowDepth / 2, 0]}
+            >
+              {material}
+            </Box>
+            {/* Right wall */}
+            <Box
+              args={[wallThickness, hollowDepth, innerSize]}
+              position={[(size - wallThickness) / 2, solidBaseHeight + hollowDepth / 2, 0]}
+            >
+              {material}
+            </Box>
+
+            {/* Bottom of the hollow (floor) */}
+            <Box
+              args={[innerSize, 0.01, innerSize]}
+              position={[0, solidBaseHeight + 0.005, 0]}
+            >
+              {hollowMaterial}
+            </Box>
+
+            {/* Decorative rings for tall pieces */}
+            {renderTallRings()}
+          </group>
+        );
+      }
 
       return (
         <group>
@@ -165,22 +270,10 @@ export function Piece3D({
             {material}
           </Box>
 
-          {/* Hollow top (deep square indentation) */}
-          {isHollow && (
-            <Box
-              args={[hollowSize, HOLLOW_DEPTH, hollowSize]}
-              position={[0, height - HOLLOW_DEPTH / 2 + 0.01, 0]}
-            >
-              {hollowMaterial}
-            </Box>
-          )}
-
           {/* Solid top (slight pyramid/cap) */}
-          {!isHollow && (
-            <Box args={[size * 0.95, 0.08, size * 0.95]} position={[0, height + 0.04, 0]}>
-              {material}
-            </Box>
-          )}
+          <Box args={[size * 0.95, 0.08, size * 0.95]} position={[0, height + 0.04, 0]}>
+            {material}
+          </Box>
 
           {/* Decorative rings for tall pieces */}
           {renderTallRings()}
@@ -196,7 +289,10 @@ export function Piece3D({
       position-y={positionY}
       position-z={position[2]}
       scale={scale}
-      onClick={onClick}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick?.();
+      }}
       onPointerOver={onPointerOver}
       onPointerOut={onPointerOut}
     >
