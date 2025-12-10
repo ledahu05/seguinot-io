@@ -1,24 +1,61 @@
+import { useSelector } from 'react-redux';
 import type { Player, TurnPhase, GameStatus as GameStatusType } from '../types/quarto.types';
+import {
+  selectGameStatus,
+  selectGamePhase,
+  selectCurrentPlayer,
+  selectWinnerPlayer,
+  selectWinner,
+  selectIsAIThinking,
+  selectSelectedPiece,
+} from '../store/selectors';
 
 interface GameStatusProps {
-  status: GameStatusType;
-  phase: TurnPhase;
-  currentPlayer: Player | null;
-  winner: Player | null;
-  isDraw: boolean;
-  isAIThinking: boolean;
+  // For backward compatibility with existing usage
+  status?: GameStatusType;
+  phase?: TurnPhase;
+  currentPlayer?: Player | null;
+  winner?: Player | null;
+  isDraw?: boolean;
+  isAIThinking?: boolean;
   selectedPieceName?: string;
+  // New props for online mode
+  playerIndex?: 0 | 1;
+  isOnline?: boolean;
+  roomCode?: string;
 }
 
 export function GameStatus({
-  status,
-  phase,
-  currentPlayer,
-  winner,
-  isDraw,
-  isAIThinking,
-  selectedPieceName,
+  status: propStatus,
+  phase: propPhase,
+  currentPlayer: propCurrentPlayer,
+  winner: propWinner,
+  isDraw: propIsDraw,
+  isAIThinking: propIsAIThinking,
+  selectedPieceName: propSelectedPieceName,
+  playerIndex: _playerIndex,
+  isOnline = false,
+  roomCode,
 }: GameStatusProps) {
+  // playerIndex is available for future use (e.g., showing "Your turn" vs "Opponent's turn")
+  void _playerIndex;
+  // Use selectors if props not provided (for online mode)
+  const reduxStatus = useSelector(selectGameStatus);
+  const reduxPhase = useSelector(selectGamePhase);
+  const reduxCurrentPlayer = useSelector(selectCurrentPlayer);
+  const reduxWinnerPlayer = useSelector(selectWinnerPlayer);
+  const reduxWinner = useSelector(selectWinner);
+  const reduxIsAIThinking = useSelector(selectIsAIThinking);
+  const reduxSelectedPiece = useSelector(selectSelectedPiece);
+
+  // Use props if provided, otherwise use redux state
+  const status = propStatus ?? reduxStatus ?? 'waiting';
+  const phase = propPhase ?? reduxPhase ?? 'selecting';
+  const currentPlayer = propCurrentPlayer ?? reduxCurrentPlayer;
+  const winner = propWinner ?? reduxWinnerPlayer;
+  const isDraw = propIsDraw ?? (reduxWinner === 'draw');
+  const isAIThinking = propIsAIThinking ?? reduxIsAIThinking;
+  const selectedPieceName = propSelectedPieceName ?? (reduxSelectedPiece ? `Piece ${reduxSelectedPiece.id}` : undefined);
   // Game finished state
   if (status === 'finished') {
     if (isDraw) {
@@ -67,6 +104,14 @@ export function GameStatus({
   // Active game state
   return (
     <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4">
+      {/* Online mode header with room code */}
+      {isOnline && roomCode && (
+        <div className="mb-3 flex items-center justify-between border-b border-slate-600 pb-2">
+          <span className="text-xs text-emerald-400">Room: {roomCode}</span>
+          <span className="text-xs text-slate-400">Online Game</span>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <span className="text-xs text-slate-400 sm:text-sm">Current Turn</span>

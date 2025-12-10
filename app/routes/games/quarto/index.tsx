@@ -3,11 +3,22 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useQuartoGame } from '@/features/quarto/hooks';
 import type { AIDifficulty } from '@/features/quarto/types/quarto.types';
 
+// Generate a random 6-character room code
+function generateRoomCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed similar-looking chars
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
 export const Route = createFileRoute('/games/quarto/')({
   component: QuartoMenuPage,
 });
 
 type GameModeSelection = 'local' | 'ai' | 'online' | null;
+type OnlineMode = 'create' | 'join' | null;
 
 function QuartoMenuPage() {
   const navigate = useNavigate();
@@ -24,6 +35,11 @@ function QuartoMenuPage() {
   const [difficulty, setDifficulty] = useState<AIDifficulty>('medium');
   const [playerGoesFirst, setPlayerGoesFirst] = useState(true);
 
+  // Online game form state
+  const [onlineMode, setOnlineMode] = useState<OnlineMode>(null);
+  const [onlinePlayerName, setOnlinePlayerName] = useState('Player');
+  const [roomCode, setRoomCode] = useState('');
+
   const handleStartLocalGame = () => {
     startLocalGame(player1Name || 'Player 1', player2Name || 'Player 2');
     navigate({ to: '/games/quarto/play' });
@@ -32,6 +48,22 @@ function QuartoMenuPage() {
   const handleStartAIGame = () => {
     startAIGame(playerName || 'Player', difficulty, playerGoesFirst);
     navigate({ to: '/games/quarto/play' });
+  };
+
+  const handleCreateRoom = () => {
+    const newRoomCode = generateRoomCode();
+    navigate({
+      to: '/games/quarto/online',
+      search: { room: newRoomCode, host: true, name: onlinePlayerName || 'Host' },
+    });
+  };
+
+  const handleJoinRoom = () => {
+    if (roomCode.length !== 6) return;
+    navigate({
+      to: '/games/quarto/online',
+      search: { room: roomCode.toUpperCase(), host: false, name: onlinePlayerName || 'Guest' },
+    });
   };
 
   return (
@@ -70,11 +102,12 @@ function QuartoMenuPage() {
 
             <button
               onClick={() => setSelectedMode('online')}
-              disabled
-              className="w-full cursor-not-allowed rounded-lg bg-slate-700 p-3 text-left opacity-50 sm:p-4"
+              className="w-full rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 p-3 text-left transition-all hover:from-emerald-400 hover:to-teal-400 hover:shadow-lg hover:shadow-emerald-500/25 sm:p-4"
             >
-              <h2 className="text-lg font-bold text-slate-300 sm:text-xl">Online Multiplayer</h2>
-              <p className="text-sm text-slate-500">Coming soon...</p>
+              <h2 className="text-lg font-bold text-white sm:text-xl">Online Multiplayer</h2>
+              <p className="text-sm text-emerald-100">
+                Play against a friend over the internet
+              </p>
             </button>
           </div>
         )}
@@ -212,6 +245,124 @@ function QuartoMenuPage() {
               className="w-full rounded-lg bg-gradient-to-r from-purple-500 to-violet-500 py-4 text-lg font-bold text-white transition-all hover:from-purple-400 hover:to-violet-400"
             >
               Start Game
+            </button>
+          </div>
+        )}
+
+        {/* Online Game Setup */}
+        {selectedMode === 'online' && !onlineMode && (
+          <div className="space-y-6">
+            <button
+              onClick={() => setSelectedMode(null)}
+              className="text-slate-400 hover:text-white"
+            >
+              &larr; Back
+            </button>
+
+            <h2 className="text-2xl font-bold text-white">Online Multiplayer</h2>
+
+            <div className="space-y-4">
+              <div>
+                <label className="mb-2 block text-sm text-slate-400">
+                  Your Name
+                </label>
+                <input
+                  type="text"
+                  value={onlinePlayerName}
+                  onChange={(e) => setOnlinePlayerName(e.target.value)}
+                  className="w-full rounded-lg bg-slate-700 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  placeholder="Player"
+                  maxLength={20}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => setOnlineMode('create')}
+                className="w-full rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 p-4 text-left transition-all hover:from-emerald-400 hover:to-teal-400"
+              >
+                <h3 className="text-lg font-bold text-white">Create Room</h3>
+                <p className="text-sm text-emerald-100">
+                  Generate a room code to share with a friend
+                </p>
+              </button>
+
+              <button
+                onClick={() => setOnlineMode('join')}
+                className="w-full rounded-lg bg-slate-700 p-4 text-left transition-all hover:bg-slate-600"
+              >
+                <h3 className="text-lg font-bold text-white">Join Room</h3>
+                <p className="text-sm text-slate-400">
+                  Enter a room code to join your friend
+                </p>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Create Room Confirmation */}
+        {selectedMode === 'online' && onlineMode === 'create' && (
+          <div className="space-y-6">
+            <button
+              onClick={() => setOnlineMode(null)}
+              className="text-slate-400 hover:text-white"
+            >
+              &larr; Back
+            </button>
+
+            <h2 className="text-2xl font-bold text-white">Create Room</h2>
+
+            <p className="text-slate-400">
+              You'll be given a room code to share with your friend. They can
+              use this code to join your game.
+            </p>
+
+            <button
+              onClick={handleCreateRoom}
+              className="w-full rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 py-4 text-lg font-bold text-white transition-all hover:from-emerald-400 hover:to-teal-400"
+            >
+              Create Room
+            </button>
+          </div>
+        )}
+
+        {/* Join Room Form */}
+        {selectedMode === 'online' && onlineMode === 'join' && (
+          <div className="space-y-6">
+            <button
+              onClick={() => setOnlineMode(null)}
+              className="text-slate-400 hover:text-white"
+            >
+              &larr; Back
+            </button>
+
+            <h2 className="text-2xl font-bold text-white">Join Room</h2>
+
+            <div>
+              <label className="mb-2 block text-sm text-slate-400">
+                Room Code
+              </label>
+              <input
+                type="text"
+                value={roomCode}
+                onChange={(e) => setRoomCode(e.target.value.toUpperCase().slice(0, 6))}
+                className="w-full rounded-lg bg-slate-700 px-4 py-3 text-center text-2xl font-mono tracking-widest text-white placeholder-slate-500 uppercase focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder="XXXXXX"
+                maxLength={6}
+              />
+            </div>
+
+            <button
+              onClick={handleJoinRoom}
+              disabled={roomCode.length !== 6}
+              className={`w-full rounded-lg py-4 text-lg font-bold transition-all ${
+                roomCode.length === 6
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-400 hover:to-teal-400'
+                  : 'cursor-not-allowed bg-slate-700 text-slate-500'
+              }`}
+            >
+              Join Room
             </button>
           </div>
         )}

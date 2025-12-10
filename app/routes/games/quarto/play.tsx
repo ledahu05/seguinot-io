@@ -1,15 +1,22 @@
-import { Suspense } from 'react';
+import { Suspense, useRef } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei';
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import {
     Board3D,
     PieceTray,
     Piece3D,
     GameStatus,
-    GameControls
+    GameControls,
+    CameraDebugOverlay
 } from '@/features/quarto/components';
-import { useQuartoGame, useResponsiveCamera, useKeyboardNavigation, useAI } from '@/features/quarto/hooks';
+import {
+    useQuartoGame,
+    useResponsiveCamera,
+    useKeyboardNavigation,
+    useAI
+} from '@/features/quarto/hooks';
 import { createEmptyBoard } from '@/features/quarto/utils';
 
 export const Route = createFileRoute('/games/quarto/play')({
@@ -19,6 +26,7 @@ export const Route = createFileRoute('/games/quarto/play')({
 function QuartoPlayPage() {
     const navigate = useNavigate();
     const cameraConfig = useResponsiveCamera();
+    const orbitControlsRef = useRef<OrbitControlsImpl>(null);
     const {
         game,
         board,
@@ -45,37 +53,40 @@ function QuartoPlayPage() {
     } = useQuartoGame();
 
     // Keyboard navigation
-    const {
-        focusedPieceIndex,
-        focusedBoardPosition,
-        isKeyboardActive
-    } = useKeyboardNavigation({
-        availablePieces,
-        phase: phase ?? null,
-        disabled: isAIThinking || isGameOver,
-        onSelectPiece: selectPiece,
-        onPlacePiece: placePiece,
-        onCallQuarto: callQuarto,
-        canCallQuarto,
-        board: board?.positions ?? []
-    });
+    const { focusedPieceIndex, focusedBoardPosition, isKeyboardActive } =
+        useKeyboardNavigation({
+            availablePieces,
+            phase: phase ?? null,
+            disabled: isAIThinking || isGameOver,
+            onSelectPiece: selectPiece,
+            onPlacePiece: placePiece,
+            onCallQuarto: callQuarto,
+            canCallQuarto,
+            board: board?.positions ?? []
+        });
 
     // Determine if it's AI's turn
     const isAIGame = game?.mode === 'ai';
-    const aiPlayer = game?.players.find(p => p.type === 'ai');
-    const aiPlayerIndex = game?.players.findIndex(p => p.type === 'ai') as 0 | 1 | undefined;
-    const isAITurn = isAIGame && aiPlayerIndex !== undefined && game?.currentTurn === aiPlayerIndex;
+    const aiPlayer = game?.players.find((p) => p.type === 'ai');
+    const aiPlayerIndex = game?.players.findIndex((p) => p.type === 'ai') as
+        | 0
+        | 1
+        | undefined;
+    const isAITurn =
+        isAIGame &&
+        aiPlayerIndex !== undefined &&
+        game?.currentTurn === aiPlayerIndex;
 
     // AI hook - handles automatic AI moves
     useAI({
         enabled: isAIGame,
         isAITurn: isAITurn ?? false,
         board,
-        availablePieces: availablePieces.map(p => p.id),
+        availablePieces: availablePieces.map((p) => p.id),
         selectedPiece: selectedPiece?.id ?? null,
         phase,
         difficulty: aiPlayer?.difficulty ?? 'medium',
-        gameStatus: status,
+        gameStatus: status
     });
 
     // Redirect if no game is active
@@ -141,7 +152,10 @@ function QuartoPlayPage() {
                                 }}
                             >
                                 <ambientLight intensity={1.0} />
-                                <directionalLight position={[2, 4, 2]} intensity={1.2} />
+                                <directionalLight
+                                    position={[2, 4, 2]}
+                                    intensity={1.2}
+                                />
                                 <Piece3D
                                     piece={selectedPiece}
                                     position={[0, -0.5, 0]}
@@ -162,6 +176,7 @@ function QuartoPlayPage() {
                             far: 100
                         }}
                         shadows
+                        style={{ background: '#e5e5e5' }}
                     >
                         <Suspense fallback={null}>
                             {/* Lighting */}
@@ -172,7 +187,10 @@ function QuartoPlayPage() {
                                 castShadow
                                 shadow-mapSize={[2048, 2048]}
                             />
-                            <pointLight position={[-10, 10, -10]} intensity={0.3} />
+                            <pointLight
+                                position={[-10, 10, -10]}
+                                intensity={0.3}
+                            />
 
                             {/* Environment */}
                             <Environment preset='studio' />
@@ -183,7 +201,11 @@ function QuartoPlayPage() {
                                 onPositionClick={handlePositionClick}
                                 onPositionHover={hoverPosition}
                                 hoveredPosition={hoveredPosition}
-                                focusedPosition={isKeyboardActive ? focusedBoardPosition : null}
+                                focusedPosition={
+                                    isKeyboardActive
+                                        ? focusedBoardPosition
+                                        : null
+                                }
                                 winningLine={winningPositions}
                             />
 
@@ -198,6 +220,7 @@ function QuartoPlayPage() {
 
                             {/* Camera Controls */}
                             <OrbitControls
+                                ref={orbitControlsRef}
                                 enablePan={false}
                                 minDistance={4}
                                 maxDistance={20}
@@ -205,6 +228,9 @@ function QuartoPlayPage() {
                                 maxPolarAngle={Math.PI / 2.5}
                                 target={cameraConfig.board.target}
                             />
+
+                            {/* Debug Overlay */}
+                            <CameraDebugOverlay controlsRef={orbitControlsRef} />
                         </Suspense>
                     </Canvas>
                 </div>
@@ -218,6 +244,7 @@ function QuartoPlayPage() {
                             near: 0.1,
                             far: 100
                         }}
+                        // style={{ background: '#9ca3af' }}
                     >
                         <Suspense fallback={null}>
                             {/* Lighting for tray */}
@@ -233,7 +260,9 @@ function QuartoPlayPage() {
                                 selectedPieceId={selectedPiece?.id}
                                 onPieceSelect={handlePieceSelect}
                                 disabled={phase !== 'selecting' || isAIThinking}
-                                focusedIndex={isKeyboardActive ? focusedPieceIndex : null}
+                                focusedIndex={
+                                    isKeyboardActive ? focusedPieceIndex : null
+                                }
                                 layout='bottom'
                             />
 
@@ -307,9 +336,32 @@ function QuartoPlayPage() {
                             Keyboard Controls
                         </h3>
                         <ul className='space-y-0.5'>
-                            <li><kbd className='rounded bg-slate-600 px-1'>Tab</kbd> / <kbd className='rounded bg-slate-600 px-1'>Arrows</kbd> Navigate</li>
-                            <li><kbd className='rounded bg-slate-600 px-1'>Enter</kbd> / <kbd className='rounded bg-slate-600 px-1'>Space</kbd> Select/Place</li>
-                            <li><kbd className='rounded bg-slate-600 px-1'>Q</kbd> Call Quarto</li>
+                            <li>
+                                <kbd className='rounded bg-slate-600 px-1'>
+                                    Tab
+                                </kbd>{' '}
+                                /{' '}
+                                <kbd className='rounded bg-slate-600 px-1'>
+                                    Arrows
+                                </kbd>{' '}
+                                Navigate
+                            </li>
+                            <li>
+                                <kbd className='rounded bg-slate-600 px-1'>
+                                    Enter
+                                </kbd>{' '}
+                                /{' '}
+                                <kbd className='rounded bg-slate-600 px-1'>
+                                    Space
+                                </kbd>{' '}
+                                Select/Place
+                            </li>
+                            <li>
+                                <kbd className='rounded bg-slate-600 px-1'>
+                                    Q
+                                </kbd>{' '}
+                                Call Quarto
+                            </li>
                         </ul>
                     </div>
                 </div>

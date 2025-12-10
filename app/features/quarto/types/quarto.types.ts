@@ -75,6 +75,12 @@ export interface Room {
 // Redux state shape
 export interface QuartoState {
   game: Game | null;
+  online: {
+    roomId: string | null;
+    playerId: string | null;
+    playerIndex: 0 | 1 | null;
+    isHost: boolean;
+  };
   ui: {
     selectedPosition: number | null;
     hoveredPosition: number | null;

@@ -7,6 +7,7 @@ import { hasQuarto, findAllWinningLines } from '../utils/winDetection';
 // Basic selectors
 export const selectQuartoState = (state: RootState) => state.quarto;
 export const selectGame = (state: RootState) => state.quarto.game;
+export const selectOnline = (state: RootState) => state.quarto.online;
 export const selectUI = (state: RootState) => state.quarto.ui;
 
 // Derived selectors (memoized)
@@ -176,4 +177,38 @@ export const selectIsConnected = createSelector(
 export const selectIsConnecting = createSelector(
   selectConnectionStatus,
   (status) => status === 'connecting'
+);
+
+// Online selectors
+export const selectOnlineRoomId = createSelector(
+  selectOnline,
+  (online) => online.roomId
+);
+
+export const selectOnlinePlayerId = createSelector(
+  selectOnline,
+  (online) => online.playerId
+);
+
+export const selectOnlinePlayerIndex = createSelector(
+  selectOnline,
+  (online) => online.playerIndex
+);
+
+export const selectIsOnlineHost = createSelector(
+  selectOnline,
+  (online) => online.isHost
+);
+
+export const selectIsOnlineGame = createSelector(
+  selectGame,
+  (game) => game?.mode === 'online'
+);
+
+export const selectIsMyTurnOnline = createSelector(
+  [selectGame, selectOnlinePlayerIndex],
+  (game, playerIndex): boolean => {
+    if (!game || playerIndex === null) return false;
+    return game.currentTurn === playerIndex;
+  }
 );

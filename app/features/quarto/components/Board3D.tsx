@@ -23,9 +23,9 @@ const INDENT_DEPTH = 0.08;
 const INDENT_RADIUS = 0.42;
 
 // Colors
-const BOARD_COLOR = '#8B4513'; // Saddle brown - rich wood
-const BOARD_DARK_COLOR = '#5D3A1A'; // Darker wood for accents
-const INDENT_COLOR = '#654321'; // Dark wood indent
+const BOARD_COLOR = '#1a1a1a'; // Dark black
+const BOARD_DARK_COLOR = '#0a0a0a'; // Darker black for accents
+const INDENT_COLOR = '#2a2a2a'; // Charcoal for cell indents
 const WINNING_HIGHLIGHT = '#FFD700'; // Gold for winning positions
 const FOCUS_HIGHLIGHT = '#00BFFF'; // Cyan for keyboard focus
 

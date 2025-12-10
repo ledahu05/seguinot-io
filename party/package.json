@@ -1,0 +1,16 @@
+{
+  "name": "quarto-multiplayer",
+  "version": "1.0.0",
+  "description": "PartyKit server for Quarto multiplayer game",
+  "main": "src/quarto.ts",
+  "scripts": {
+    "dev": "partykit dev --port 1999",
+    "deploy": "partykit deploy"
+  },
+  "dependencies": {
+    "partykit": "^0.0.111"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
