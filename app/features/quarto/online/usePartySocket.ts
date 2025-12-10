@@ -69,10 +69,7 @@ export function usePartySocket({
     });
 
     socket.addEventListener('message', (event) => {
-      if (isCleanedUp) {
-        console.log('[usePartySocket] Ignoring MESSAGE from stale socket');
-        return;
-      }
+      if (isCleanedUp) return;
       try {
         const message = JSON.parse(event.data) as ServerMessage;
         onMessageRef.current(message);
