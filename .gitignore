@@ -56,3 +56,5 @@ src
 remaining.md
 .vercel/
 party/.partykit/state/party/-PartyKitDurable/
+.vercel
+.env*.local
