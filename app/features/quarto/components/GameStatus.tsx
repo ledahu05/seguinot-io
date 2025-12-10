@@ -60,7 +60,11 @@ export function GameStatus({
   if (status === 'finished') {
     if (isDraw) {
       return (
-        <div className="rounded-lg bg-yellow-500/20 p-3 text-center sm:p-4">
+        <div
+          className="rounded-lg bg-yellow-500/20 p-3 text-center sm:p-4"
+          role="alert"
+          aria-live="assertive"
+        >
           <h2 className="text-xl font-bold text-yellow-400 sm:text-2xl">Draw!</h2>
           <p className="mt-2 text-sm text-yellow-200 sm:text-base">The board is full with no Quarto.</p>
         </div>
@@ -69,7 +73,11 @@ export function GameStatus({
 
     if (winner) {
       return (
-        <div className="rounded-lg bg-green-500/20 p-3 text-center sm:p-4">
+        <div
+          className="rounded-lg bg-green-500/20 p-3 text-center sm:p-4"
+          role="alert"
+          aria-live="assertive"
+        >
           <h2 className="text-xl font-bold text-green-400 sm:text-2xl">Quarto!</h2>
           <p className="mt-2 text-sm text-green-200 sm:text-base">{winner.name} wins!</p>
         </div>
@@ -80,7 +88,11 @@ export function GameStatus({
   // Waiting for opponent (online mode)
   if (status === 'waiting') {
     return (
-      <div className="rounded-lg bg-blue-500/20 p-3 text-center sm:p-4">
+      <div
+        className="rounded-lg bg-blue-500/20 p-3 text-center sm:p-4"
+        role="status"
+        aria-live="polite"
+      >
         <h2 className="text-lg font-bold text-blue-400 sm:text-xl">Waiting for opponent...</h2>
         <p className="mt-2 text-sm text-blue-200">Share the room code to invite a friend.</p>
       </div>
@@ -90,12 +102,17 @@ export function GameStatus({
   // AI thinking state
   if (isAIThinking) {
     return (
-      <div className="rounded-lg bg-purple-500/20 p-3 text-center sm:p-4">
+      <div
+        className="rounded-lg bg-purple-500/20 p-3 text-center sm:p-4"
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+      >
         <h2 className="text-lg font-bold text-purple-400 sm:text-xl">AI is thinking...</h2>
-        <div className="mt-2 flex justify-center">
-          <div className="h-2 w-2 animate-bounce rounded-full bg-purple-400 [animation-delay:-0.3s]" />
-          <div className="mx-1 h-2 w-2 animate-bounce rounded-full bg-purple-400 [animation-delay:-0.15s]" />
-          <div className="h-2 w-2 animate-bounce rounded-full bg-purple-400" />
+        <div className="mt-2 flex justify-center" aria-hidden="true">
+          <div className="h-2 w-2 animate-bounce rounded-full bg-purple-400 motion-reduce:animate-none [animation-delay:-0.3s]" />
+          <div className="mx-1 h-2 w-2 animate-bounce rounded-full bg-purple-400 motion-reduce:animate-none [animation-delay:-0.15s]" />
+          <div className="h-2 w-2 animate-bounce rounded-full bg-purple-400 motion-reduce:animate-none" />
         </div>
       </div>
     );
@@ -103,7 +120,12 @@ export function GameStatus({
 
   // Active game state
   return (
-    <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4">
+    <div
+      className="rounded-lg bg-slate-700/50 p-3 sm:p-4"
+      role="status"
+      aria-live="polite"
+      aria-label={`${currentPlayer?.name ?? 'Unknown'}'s turn, ${phase} phase`}
+    >
       {/* Online mode header with room code */}
       {isOnline && roomCode && (
         <div className="mb-3 flex items-center justify-between border-b border-slate-600 pb-2">

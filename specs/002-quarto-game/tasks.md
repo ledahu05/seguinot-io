@@ -152,45 +152,45 @@
 
 ### 7.1 PartyKit Server Setup
 
-- [ ] T050 [P] [US3] Create `/party` directory structure with package.json, tsconfig.json, partykit.json
-- [ ] T051 [P] [US3] Duplicate types to party/src/types.ts (ClientMessage, ServerMessage, RoomState)
-- [ ] T052 [P] [US3] Copy game logic to party/src/game-logic.ts (win detection, validation)
-- [ ] T053 [US3] Implement QuartoParty class in party/src/quarto.ts with onConnect, onMessage, onClose
-- [ ] T054 [US3] Implement CREATE_ROOM and JOIN_ROOM message handlers
-- [ ] T055 [US3] Implement SELECT_PIECE, PLACE_PIECE, CALL_QUARTO message handlers
-- [ ] T056 [US3] Implement STATE_UPDATE broadcasting to all connections
-- [ ] T057 [US3] Add 2-minute reconnection timer with RECONNECT message support
+- [X] T050 [P] [US3] Create `/party` directory structure with package.json, tsconfig.json, partykit.json
+- [X] T051 [P] [US3] Duplicate types to party/src/types.ts (ClientMessage, ServerMessage, RoomState)
+- [X] T052 [P] [US3] Copy game logic to party/src/game-logic.ts (win detection, validation)
+- [X] T053 [US3] Implement QuartoParty class in party/src/quarto.ts with onConnect, onMessage, onClose
+- [X] T054 [US3] Implement CREATE_ROOM and JOIN_ROOM message handlers
+- [X] T055 [US3] Implement SELECT_PIECE, PLACE_PIECE, CALL_QUARTO message handlers
+- [X] T056 [US3] Implement STATE_UPDATE broadcasting to all connections
+- [X] T057 [US3] Add 2-minute reconnection timer with RECONNECT message support
 
 ### 7.2 Client Integration with partysocket
 
-- [ ] T058 [P] [US3] Install partysocket dependency in main app
-- [ ] T059 [P] [US3] Create app/features/quarto/online/ directory structure
-- [ ] T060 [US3] Implement usePartySocket hook in app/features/quarto/online/usePartySocket.ts
-- [ ] T061 [US3] Implement useOnlineGame hook in app/features/quarto/online/useOnlineGame.ts
-- [ ] T062 [US3] Create client message types in app/features/quarto/online/types.ts
-- [ ] T063 [US3] Create online barrel export in app/features/quarto/online/index.ts
-- [ ] T064 [US3] Add connection status and playerId to RTK slice (setConnectionStatus, setOnlineGame)
-- [ ] T065 [US3] Store playerId in sessionStorage for reconnection
+- [X] T058 [P] [US3] Install partysocket dependency in main app
+- [X] T059 [P] [US3] Create app/features/quarto/online/ directory structure
+- [X] T060 [US3] Implement usePartySocket hook in app/features/quarto/online/usePartySocket.ts
+- [X] T061 [US3] Implement useOnlineGame hook in app/features/quarto/online/useOnlineGame.ts
+- [X] T062 [US3] Create client message types in app/features/quarto/online/types.ts
+- [X] T063 [US3] Create online barrel export in app/features/quarto/online/index.ts
+- [X] T064 [US3] Add connection status and playerId to RTK slice (setConnectionStatus, setOnlineGame)
+- [X] T065 [US3] Store playerId in sessionStorage for reconnection
 
 ### 7.3 UI Updates
 
-- [ ] T066 [US3] Enable online button in app/routes/games/quarto/index.tsx menu
-- [ ] T067 [US3] Create room create/join form component
-- [ ] T068 [US3] Create app/routes/games/quarto/online.tsx lobby route with room code display
-- [ ] T069 [US3] Modify play.tsx to support online mode (use onlineGame state)
-- [ ] T070 [US3] Create ConnectionStatus component showing connection state and room code
-- [ ] T071 [US3] Add waiting screen when host is waiting for guest
+- [X] T066 [US3] Enable online button in app/routes/games/quarto/index.tsx menu
+- [X] T067 [US3] Create room create/join form component
+- [X] T068 [US3] Create app/routes/games/quarto/online.tsx lobby route with room code display
+- [X] T069 [US3] Modify play.tsx to support online mode (use onlineGame state)
+- [X] T070 [US3] Create ConnectionStatus component showing connection state and room code
+- [X] T071 [US3] Add waiting screen when host is waiting for guest
 
 ### 7.4 Testing & Deployment
 
-- [ ] T072 [P] [US3] Add party:dev script to root package.json ("cd party && npx partykit dev --port 1999")
-- [ ] T073 [P] [US3] Add party:deploy script to root package.json
-- [ ] T074 [US3] Configure VITE_PARTYKIT_HOST environment variable (localhost:1999 for dev)
-- [ ] T075 [US3] Test full flow locally: create room, join room, play game, win/draw
-- [ ] T076 [US3] Test disconnection and reconnection within 2-minute window
-- [ ] T077 [US3] Test forfeit when reconnection timeout expires
-- [ ] T078 [US3] Deploy PartyKit to partykit.dev
-- [ ] T079 [US3] Configure VITE_PARTYKIT_HOST in Vercel production environment
+- [X] T072 [P] [US3] Add party:dev script to root package.json ("cd party && npx partykit dev --port 1999")
+- [X] T073 [P] [US3] Add party:deploy script to root package.json
+- [X] T074 [US3] Configure VITE_PARTYKIT_HOST environment variable (localhost:1999 for dev)
+- [X] T075 [US3] Test full flow locally: create room, join room, play game, win/draw
+- [X] T076 [US3] Test disconnection and reconnection within 2-minute window
+- [X] T077 [US3] Test forfeit when reconnection timeout expires
+- [X] T078 [US3] Deploy PartyKit to partykit.dev
+- [X] T079 [US3] Configure VITE_PARTYKIT_HOST in Vercel production environment
 
 **Checkpoint**: Online multiplayer fully functional via PartyKit with room management and reconnection
 
@@ -200,17 +200,17 @@
 
 **Purpose**: Accessibility, performance, and final touches
 
-- [ ] T063 [P] Add ARIA live regions for game state announcements
-- [ ] T064 [P] Implement reduced-motion mode for animations
-- [ ] T065 [P] Add keyboard shortcuts help overlay
-- [ ] T066 Optimize 3D rendering performance (instanced meshes if needed)
-- [ ] T067 [P] Add loading states and Suspense boundaries for 3D canvas
-- [ ] T068 Implement code splitting for quarto feature (lazy load)
-- [ ] T069 [P] Add touch controls for mobile piece selection
-- [ ] T070 Mobile responsive layout adjustments
-- [ ] T071 Run Lighthouse performance audit, address issues
-- [ ] T072 Final integration testing across all game modes
-- [ ] T073 Run quickstart.md validation checklist
+- [X] T063 [P] Add ARIA live regions for game state announcements
+- [X] T064 [P] Implement reduced-motion mode for animations
+- [X] T065 [P] Add keyboard shortcuts help overlay
+- [X] T066 Optimize 3D rendering performance (instanced meshes if needed)
+- [X] T067 [P] Add loading states and Suspense boundaries for 3D canvas
+- [X] T068 Implement code splitting for quarto feature (lazy load)
+- [X] T069 [P] Add touch controls for mobile piece selection
+- [X] T070 Mobile responsive layout adjustments
+- [X] T071 Run Lighthouse performance audit, address issues
+- [X] T072 Final integration testing across all game modes
+- [X] T073 Run quickstart.md validation checklist
 
 ---
 
