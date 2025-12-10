@@ -3,6 +3,7 @@ import { useSpring, animated } from '@react-spring/three';
 import { Cylinder, Box, Sphere, Torus, Ring } from '@react-three/drei';
 import * as THREE from 'three';
 import type { Piece } from '../types/quarto.types';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 
 interface Piece3DProps {
   piece: Piece;
@@ -45,12 +46,17 @@ export function Piece3D({
   onPointerOut,
 }: Piece3DProps) {
   const groupRef = useRef<THREE.Group>(null);
+  const prefersReducedMotion = useReducedMotion();
 
   // Animation for selection/hover/focus states
+  // With reduced motion, use instant transitions
   const { scale, positionY } = useSpring({
     scale: isSelected ? 1.15 : (isHovered || isFocused) ? 1.05 : 1,
     positionY: isSelected ? position[1] + 0.2 : (isFocused ? position[1] + 0.1 : position[1]),
-    config: { tension: 300, friction: 20 },
+    config: prefersReducedMotion
+      ? { tension: 1000, friction: 100 } // Instant transition
+      : { tension: 300, friction: 20 },   // Smooth animation
+    immediate: prefersReducedMotion,
   });
 
   // Derive piece properties

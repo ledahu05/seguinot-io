@@ -9,7 +9,9 @@ import {
     Piece3D,
     GameStatus,
     GameControls,
-    CameraDebugOverlay
+    CameraDebugOverlay,
+    KeyboardShortcutsHelp,
+    Canvas3DLoader
 } from '@/features/quarto/components';
 import {
     useQuartoGame,
@@ -139,35 +141,38 @@ function QuartoPlayPage() {
             {/* Main game area (board + tray) */}
             <div className='flex flex-1 flex-col'>
                 {/* Board Canvas */}
-                <div className='flex-[7] min-h-0 relative'>
+                <div className='flex-[7] min-h-0 relative touch-none'>
                     {/* Selected piece preview - top right corner */}
                     {selectedPiece && (
                         <div className='absolute top-2 right-2 z-10 w-24 h-24 rounded-lg bg-slate-800/80 border border-slate-600'>
-                            <Canvas
-                                camera={{
-                                    position: [0, 0.5, 3],
-                                    fov: 45,
-                                    near: 0.1,
-                                    far: 100
-                                }}
-                            >
-                                <ambientLight intensity={1.0} />
-                                <directionalLight
-                                    position={[2, 4, 2]}
-                                    intensity={1.2}
-                                />
-                                <Piece3D
-                                    piece={selectedPiece}
-                                    position={[0, -0.5, 0]}
-                                    isSelected={false}
-                                />
-                                <OrbitControls
-                                    enablePan={false}
-                                    enableZoom={false}
-                                />
-                            </Canvas>
+                            <Suspense fallback={<Canvas3DLoader message="Loading piece..." />}>
+                                <Canvas
+                                    camera={{
+                                        position: [0, 0.5, 3],
+                                        fov: 45,
+                                        near: 0.1,
+                                        far: 100
+                                    }}
+                                >
+                                    <ambientLight intensity={1.0} />
+                                    <directionalLight
+                                        position={[2, 4, 2]}
+                                        intensity={1.2}
+                                    />
+                                    <Piece3D
+                                        piece={selectedPiece}
+                                        position={[0, -0.5, 0]}
+                                        isSelected={false}
+                                    />
+                                    <OrbitControls
+                                        enablePan={false}
+                                        enableZoom={false}
+                                    />
+                                </Canvas>
+                            </Suspense>
                         </div>
                     )}
+                    <Suspense fallback={<Canvas3DLoader message="Loading game board..." />}>
                     <Canvas
                         camera={{
                             position: cameraConfig.board.position,
@@ -233,10 +238,12 @@ function QuartoPlayPage() {
                             <CameraDebugOverlay controlsRef={orbitControlsRef} />
                         </Suspense>
                     </Canvas>
+                    </Suspense>
                 </div>
 
                 {/* Piece Tray Canvas - perspective angled view */}
-                <div className='flex-[3] min-h-0 border-t border-slate-700 bg-slate-800/50'>
+                <div className='flex-[3] min-h-0 border-t border-slate-700 bg-slate-800/50 touch-none'>
+                    <Suspense fallback={<Canvas3DLoader message="Loading pieces..." />}>
                     <Canvas
                         camera={{
                             position: cameraConfig.tray.position,
@@ -275,11 +282,12 @@ function QuartoPlayPage() {
                             />
                         </Suspense>
                     </Canvas>
+                    </Suspense>
                 </div>
             </div>
 
-            {/* Side Panel */}
-            <div className='flex w-full flex-col gap-4 overflow-y-auto bg-slate-800 p-4 md:w-80 md:gap-6 md:overflow-visible md:p-6'>
+            {/* Side Panel - scrollable on mobile, fixed on desktop */}
+            <div className='flex w-full shrink-0 flex-col gap-3 overflow-y-auto bg-slate-800 p-3 sm:gap-4 sm:p-4 md:w-80 md:gap-6 md:overflow-visible md:p-6'>
                 <h1 className='text-xl font-bold text-white md:text-2xl'>
                     Quarto
                 </h1>
@@ -331,39 +339,7 @@ function QuartoPlayPage() {
                             <li>Call "Quarto!" to win</li>
                         </ol>
                     </div>
-                    <div className='rounded-lg bg-slate-700/50 p-3 text-xs text-slate-400'>
-                        <h3 className='mb-1 font-semibold text-slate-300'>
-                            Keyboard Controls
-                        </h3>
-                        <ul className='space-y-0.5'>
-                            <li>
-                                <kbd className='rounded bg-slate-600 px-1'>
-                                    Tab
-                                </kbd>{' '}
-                                /{' '}
-                                <kbd className='rounded bg-slate-600 px-1'>
-                                    Arrows
-                                </kbd>{' '}
-                                Navigate
-                            </li>
-                            <li>
-                                <kbd className='rounded bg-slate-600 px-1'>
-                                    Enter
-                                </kbd>{' '}
-                                /{' '}
-                                <kbd className='rounded bg-slate-600 px-1'>
-                                    Space
-                                </kbd>{' '}
-                                Select/Place
-                            </li>
-                            <li>
-                                <kbd className='rounded bg-slate-600 px-1'>
-                                    Q
-                                </kbd>{' '}
-                                Call Quarto
-                            </li>
-                        </ul>
-                    </div>
+                    <KeyboardShortcutsHelp />
                 </div>
             </div>
         </div>
