@@ -21,7 +21,7 @@ import {
   selectConnectionStatus,
   selectError,
 } from '@/features/quarto/store/selectors';
-import { resetGame, clearOnlineRoom } from '@/features/quarto/store/quartoSlice';
+import { resetGame, clearOnlineRoom, setConnectionStatus } from '@/features/quarto/store/quartoSlice';
 import { createEmptyBoard } from '@/features/quarto/utils/winDetection';
 
 const searchSchema = z.object({
@@ -43,12 +43,9 @@ function OnlineGamePage() {
 
   // Reset any previous game state on mount
   useEffect(() => {
-    console.log('[Online] Component mounted, resetting game and online state');
     dispatch(resetGame());
     dispatch(clearOnlineRoom());
-    return () => {
-      console.log('[Online] Component unmounting');
-    };
+    dispatch(setConnectionStatus('disconnected')); // Clear stale connection status
   }, [dispatch]);
 
   // Redux state
@@ -83,63 +80,48 @@ function OnlineGamePage() {
 
   // Track if we've attempted to create/join
   const [hasAttemptedConnect, setHasAttemptedConnect] = useState(false);
+  // Track when socket actually opened (not just Redux state)
+  const [socketReady, setSocketReady] = useState(false);
 
   // Track if the game is ready for interaction
   const gameReady = game?.status === 'playing' && playerIndex !== null;
 
-  // Create or join room on connection
+  // Track when connection status changes to 'connected'
   useEffect(() => {
-    console.log('[Online] Connection effect triggered', {
-      connectionStatus,
-      hasAttemptedConnect,
-      host,
-      room,
-    });
-    if (connectionStatus === 'connected' && !hasAttemptedConnect) {
+    if (connectionStatus === 'connected') {
+      // Small delay to ensure socket is fully ready
+      const timer = setTimeout(() => {
+        setSocketReady(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    } else {
+      setSocketReady(false);
+    }
+  }, [connectionStatus]);
+
+  // Create or join room when socket is actually ready
+  useEffect(() => {
+    if (socketReady && !hasAttemptedConnect) {
       // First try to reconnect
-      console.log('[Online] Attempting to reconnect or create/join...');
       const didReconnect = reconnect();
       if (!didReconnect) {
         // No existing session, create or join
         if (host) {
-          console.log('[Online] Creating room as host');
           createRoom();
         } else {
-          console.log('[Online] Joining room as guest');
           joinRoom();
         }
-      } else {
-        console.log('[Online] Reconnection attempted');
       }
       setHasAttemptedConnect(true);
     }
-  }, [connectionStatus, hasAttemptedConnect, host, room, createRoom, joinRoom, reconnect]);
+  }, [socketReady, hasAttemptedConnect, host, createRoom, joinRoom, reconnect]);
 
   // Handle piece selection
   const handlePieceSelect = useCallback(
     (pieceId: number) => {
-      console.log('[Online] handlePieceSelect called', {
-        pieceId,
-        gameReady,
-        phase: game?.phase,
-        status: game?.status,
-        playerIndex,
-        currentTurn: game?.currentTurn,
-      });
-      // Multiple guards to prevent invalid selections
-      if (!gameReady) {
-        console.log('[Online] handlePieceSelect - game not ready');
-        return;
-      }
-      if (game?.phase !== 'selecting') {
-        console.log('[Online] handlePieceSelect - wrong phase');
-        return;
-      }
-      if (game?.currentTurn !== playerIndex) {
-        console.log('[Online] handlePieceSelect - not my turn');
-        return;
-      }
-      console.log('[Online] handlePieceSelect - sending SELECT_PIECE');
+      if (!gameReady) return;
+      if (game?.phase !== 'selecting') return;
+      if (game?.currentTurn !== playerIndex) return;
       sendSelectPiece(pieceId);
     },
     [game, gameReady, playerIndex, sendSelectPiece]
@@ -167,19 +149,10 @@ function OnlineGamePage() {
     navigate({ to: '/games/quarto' });
   }, [leaveRoom, navigate]);
 
-  // Debug logging for conditional rendering
-  console.log('[Online] Render state:', {
-    connectionStatus,
-    gameStatus,
-    game: game ? { status: game.status, playersCount: game.players.length, mode: game.mode } : null,
-    playerIndex,
-    error,
-  });
-
   // Connection status display
   if (connectionStatus === 'connecting' || connectionStatus === 'disconnected') {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-slate-900 to-slate-800 p-4">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-900 p-4">
         <div className="text-center">
           <h2 className="mb-4 text-2xl font-bold text-white">
             {connectionStatus === 'connecting' ? 'Connecting...' : 'Disconnected'}
@@ -200,7 +173,7 @@ function OnlineGamePage() {
   // Waiting for opponent
   if (gameStatus === 'waiting' || !game || game.players.length < 2) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-slate-900 to-slate-800 p-4">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-900 p-4">
         <div className="text-center">
           <h2 className="mb-4 text-2xl font-bold text-white">Waiting for Opponent</h2>
 
@@ -227,7 +200,7 @@ function OnlineGamePage() {
   // Error display
   if (error) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-slate-900 to-slate-800 p-4">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-900 p-4">
         <div className="text-center">
           <h2 className="mb-4 text-2xl font-bold text-red-400">Error</h2>
           <p className="mb-8 text-slate-400">{error}</p>
@@ -245,7 +218,7 @@ function OnlineGamePage() {
   // Game over screen
   if (isGameOver) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-slate-900 to-slate-800 p-4">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-900 p-4">
         <div className="text-center">
           <h2 className="mb-4 text-3xl font-bold text-amber-400">
             {winner === 'draw'
@@ -270,122 +243,141 @@ function OnlineGamePage() {
 
   // Main game view
   return (
-    <div className="h-screen w-full bg-gradient-to-b from-slate-900 to-slate-800">
-      {/* Game Status Header */}
-      <div className="absolute left-0 right-0 top-0 z-10 p-4">
-        <div className="mx-auto max-w-2xl">
-          <GameStatus
-            playerIndex={playerIndex ?? 0}
-            isOnline={true}
-            roomCode={room}
-          />
-
-          {/* Turn indicator */}
-          <div className="mt-2 text-center">
-            <span
-              className={`inline-block rounded-full px-4 py-1 text-sm font-medium ${
-                game?.currentTurn === playerIndex
-                  ? 'bg-emerald-500/20 text-emerald-400'
-                  : 'bg-slate-700/50 text-slate-400'
-              }`}
-            >
-              {game?.currentTurn === playerIndex
-                ? game?.phase === 'selecting'
-                  ? 'Select a piece for your opponent'
-                  : 'Place the piece on the board'
-                : "Opponent's turn"}
-            </span>
-          </div>
+    <div className="flex h-screen flex-col bg-slate-900 md:flex-row">
+      {/* Main game area (board + tray) */}
+      <div className="flex flex-1 flex-col">
+        {/* Board Canvas */}
+        <div className="relative min-h-0 flex-[7]">
+          {/* Selected piece preview - top right corner */}
+          {selectedPiece && (
+            <div className="absolute right-2 top-2 z-10 h-24 w-24 rounded-lg border border-slate-600 bg-slate-800/80">
+              <Canvas
+                camera={{
+                  position: [0, 0.5, 3],
+                  fov: 45,
+                  near: 0.1,
+                  far: 100,
+                }}
+              >
+                <ambientLight intensity={1.0} />
+                <directionalLight position={[2, 4, 2]} intensity={1.2} />
+                <Piece3D piece={selectedPiece} position={[0, -0.5, 0]} isSelected={false} />
+                <OrbitControls enablePan={false} enableZoom={false} />
+              </Canvas>
+            </div>
+          )}
+          <Canvas
+            camera={cameraConfig.board}
+            shadows
+            style={{ background: '#e5e5e5' }}
+          >
+            <ambientLight intensity={0.4} />
+            <directionalLight position={[5, 10, 5]} intensity={1} castShadow />
+            <Board3D
+              board={board ?? createEmptyBoard()}
+              onPositionClick={handleBoardClick}
+            />
+            <OrbitControls
+              enablePan={false}
+              minPolarAngle={Math.PI / 6}
+              maxPolarAngle={Math.PI / 2.5}
+              minDistance={8}
+              maxDistance={20}
+            />
+          </Canvas>
         </div>
-      </div>
 
-      {/* Selected Piece Preview */}
-      {selectedPiece && (
-        <div className="absolute right-2 top-2 z-10 h-24 w-24 rounded-lg border border-slate-600 bg-slate-800/80">
+        {/* Tray Canvas */}
+        <div className="min-h-0 flex-[3]">
           <Canvas
             camera={{
-              position: [0, 0.5, 3],
-              fov: 45,
+              position: cameraConfig.tray.position as [number, number, number],
+              fov: cameraConfig.tray.fov,
               near: 0.1,
               far: 100,
             }}
           >
-            <ambientLight intensity={1.0} />
-            <directionalLight position={[2, 4, 2]} intensity={1.2} />
-            <Piece3D piece={selectedPiece} position={[0, -0.5, 0]} isSelected={false} />
-            <OrbitControls enablePan={false} enableZoom={false} />
+            <ambientLight intensity={0.6} />
+            <directionalLight position={[0, 10, 5]} intensity={0.8} />
+            <PieceTray
+              availablePieces={availablePieces}
+              selectedPieceId={selectedPiece?.id ?? null}
+              onPieceSelect={handlePieceSelect}
+              disabled={!gameReady || game?.phase !== 'selecting' || game?.currentTurn !== playerIndex}
+              layout="bottom"
+            />
+            <OrbitControls
+              enablePan={false}
+              enableZoom={true}
+              minDistance={3}
+              maxDistance={15}
+              target={cameraConfig.tray.target as [number, number, number]}
+            />
           </Canvas>
         </div>
-      )}
+      </div>
 
-      {/* Quarto Button */}
-      {gameReady && game?.currentTurn === playerIndex && game?.phase === 'selecting' && (
-        <div className="absolute bottom-32 left-1/2 z-10 -translate-x-1/2">
-          <button
-            onClick={handleCallQuarto}
-            className="rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 px-8 py-3 text-lg font-bold text-black transition-all hover:from-amber-400 hover:to-yellow-400 hover:shadow-lg hover:shadow-amber-500/25"
+      {/* Side Panel */}
+      <div className="flex w-full flex-col gap-4 overflow-y-auto bg-slate-800 p-4 md:w-80 md:gap-6 md:overflow-visible md:p-6">
+        <h1 className="text-xl font-bold text-white md:text-2xl">Quarto Online</h1>
+
+        {/* Game Status */}
+        <GameStatus
+          playerIndex={playerIndex ?? 0}
+          isOnline={true}
+          roomCode={room}
+        />
+
+        {/* Turn indicator */}
+        <div className="text-center">
+          <span
+            className={`inline-block rounded-full px-4 py-1 text-sm font-medium ${
+              game?.currentTurn === playerIndex
+                ? 'bg-emerald-500/20 text-emerald-400'
+                : 'bg-slate-700/50 text-slate-400'
+            }`}
           >
-            Call Quarto!
+            {game?.currentTurn === playerIndex
+              ? game?.phase === 'selecting'
+                ? 'Select a piece for your opponent'
+                : 'Place the piece on the board'
+              : "Opponent's turn"}
+          </span>
+        </div>
+
+        {/* Game Controls */}
+        <div className="mt-auto space-y-3">
+          {/* Quarto Button */}
+          {gameReady && game?.currentTurn === playerIndex && game?.phase === 'selecting' && (
+            <button
+              onClick={handleCallQuarto}
+              className="w-full rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 px-8 py-3 text-lg font-bold text-black transition-all hover:from-amber-400 hover:to-yellow-400 hover:shadow-lg hover:shadow-amber-500/25"
+            >
+              Call Quarto!
+            </button>
+          )}
+
+          {/* Leave Button */}
+          <button
+            onClick={handleLeave}
+            className="w-full rounded-lg bg-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-600"
+          >
+            Leave Game
           </button>
         </div>
-      )}
 
-      {/* Leave Button */}
-      <div className="absolute bottom-4 left-4 z-10">
-        <button
-          onClick={handleLeave}
-          className="rounded-lg bg-slate-700/80 px-4 py-2 text-sm text-slate-300 hover:bg-slate-600"
-        >
-          Leave Game
-        </button>
-      </div>
-
-      {/* Main Canvas - Board (70%) */}
-      <div className="h-[70%] w-full">
-        <Canvas camera={cameraConfig.board}>
-          <ambientLight intensity={0.5} />
-          <directionalLight position={[5, 10, 5]} intensity={1} castShadow />
-          <Board3D
-            board={board ?? createEmptyBoard()}
-            onPositionClick={handleBoardClick}
-          />
-          <OrbitControls
-            enablePan={false}
-            minPolarAngle={Math.PI / 6}
-            maxPolarAngle={Math.PI / 2.5}
-            minDistance={8}
-            maxDistance={20}
-          />
-        </Canvas>
-      </div>
-
-      {/* Piece Tray Canvas (30%) */}
-      <div className="h-[30%] w-full border-t border-slate-700">
-        <Canvas
-          camera={{
-            position: cameraConfig.tray.position as [number, number, number],
-            fov: cameraConfig.tray.fov,
-            near: 0.1,
-            far: 100,
-          }}
-        >
-          <ambientLight intensity={0.6} />
-          <directionalLight position={[0, 10, 5]} intensity={0.8} />
-          <PieceTray
-            availablePieces={availablePieces}
-            selectedPieceId={selectedPiece?.id ?? null}
-            onPieceSelect={handlePieceSelect}
-            disabled={!gameReady || game?.phase !== 'selecting' || game?.currentTurn !== playerIndex}
-            layout="bottom"
-          />
-          <OrbitControls
-            enablePan={false}
-            enableZoom={true}
-            minDistance={3}
-            maxDistance={15}
-            target={cameraConfig.tray.target as [number, number, number]}
-          />
-        </Canvas>
+        {/* Instructions - hidden on mobile */}
+        <div className="mt-4 hidden space-y-4 md:block">
+          <div className="rounded-lg bg-slate-700/50 p-4 text-sm text-slate-400">
+            <h3 className="mb-2 font-semibold text-slate-300">How to Play</h3>
+            <ol className="list-inside list-decimal space-y-1">
+              <li>Select a piece for your opponent</li>
+              <li>They place it on the board</li>
+              <li>Get 4 in a row with any shared trait</li>
+              <li>Call "Quarto!" to win</li>
+            </ol>
+          </div>
+        </div>
       </div>
     </div>
   );
