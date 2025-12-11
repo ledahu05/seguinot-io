@@ -14,6 +14,8 @@
 - In-memory game state (Redux) (003-quarto-win-animation)
 - TypeScript 5.7, React 19 + React Three Fiber, Drei, Framer Motion, TanStack Router, Tailwind CSS v4 (004-quarto-rules-page)
 - N/A (stateless page, no persistence) (004-quarto-rules-page)
+- TypeScript 5.x, React 19 + TanStack Router, Framer Motion, Tailwind CSS, Lucide React icons (005-portfolio-home)
+- N/A (static content) (005-portfolio-home)
 
 ## Recent Changes
 - 001-portfolio-site: Added TypeScript 5.x, React 19, Node.js 20+
