@@ -4,3 +4,4 @@ export { useKeyboardNavigation } from './useKeyboardNavigation';
 export { useAI } from './useAI';
 export { useReducedMotion } from './useReducedMotion';
 export { useWinAnimation } from './useWinAnimation';
+export { useTurnAnimation } from './useTurnAnimation';
