@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit';
 import type { RootState } from '../../../store';
 import type { Piece, Player } from '../types/quarto.types';
 import { ALL_PIECES, getPieceById } from '../utils/pieceAttributes';
-import { hasQuarto, findAllWinningLines } from '../utils/winDetection';
+import { findAllWinningLines } from '../utils/winDetection';
 
 // Basic selectors
 export const selectQuartoState = (state: RootState) => state.quarto;
@@ -53,14 +53,6 @@ export const selectSelectedPiece = createSelector(
   (game): Piece | null => {
     if (!game || game.selectedPiece === null) return null;
     return getPieceById(game.selectedPiece) ?? null;
-  }
-);
-
-export const selectCanCallQuarto = createSelector(
-  selectBoard,
-  (board): boolean => {
-    if (!board) return false;
-    return hasQuarto(board);
   }
 );
 

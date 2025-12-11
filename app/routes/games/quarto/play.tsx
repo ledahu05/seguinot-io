@@ -11,13 +11,15 @@ import {
     GameControls,
     CameraDebugOverlay,
     KeyboardShortcutsHelp,
-    Canvas3DLoader
+    Canvas3DLoader,
+    WinCelebration
 } from '@/features/quarto/components';
 import {
     useQuartoGame,
     useResponsiveCamera,
     useKeyboardNavigation,
-    useAI
+    useAI,
+    useWinAnimation
 } from '@/features/quarto/hooks';
 import { createEmptyBoard } from '@/features/quarto/utils';
 
@@ -36,7 +38,6 @@ function QuartoPlayPage() {
         availablePieces,
         selectedPiece,
         selectedPieceDescription,
-        canCallQuarto,
         winningPositions,
         isGameOver,
         isDraw,
@@ -48,22 +49,27 @@ function QuartoPlayPage() {
         hoveredPosition,
         placePiece,
         selectPiece,
-        callQuarto,
         hoverPosition,
         resetGame,
         clearError
     } = useQuartoGame();
+
+    // Win animation
+    const {
+        isAnimationPlaying,
+        animationType,
+        duration: animationDuration,
+        handleAnimationComplete
+    } = useWinAnimation();
 
     // Keyboard navigation
     const { focusedPieceIndex, focusedBoardPosition, isKeyboardActive } =
         useKeyboardNavigation({
             availablePieces,
             phase: phase ?? null,
-            disabled: isAIThinking || isGameOver,
+            disabled: isAIThinking || isGameOver || isAnimationPlaying,
             onSelectPiece: selectPiece,
             onPlacePiece: placePiece,
-            onCallQuarto: callQuarto,
-            canCallQuarto,
             board: board?.positions ?? []
         });
 
@@ -138,6 +144,15 @@ function QuartoPlayPage() {
 
     return (
         <div className='flex h-screen flex-col bg-slate-900 md:flex-row'>
+            {/* Win Celebration Animation */}
+            <WinCelebration
+                animationType={animationType}
+                isPlaying={isAnimationPlaying}
+                duration={animationDuration}
+                winnerName={winnerPlayer?.name}
+                onAnimationComplete={handleAnimationComplete}
+            />
+
             {/* Main game area (board + tray) */}
             <div className='flex flex-1 flex-col'>
                 {/* Board Canvas */}
@@ -318,12 +333,9 @@ function QuartoPlayPage() {
 
                 {/* Game Controls */}
                 <GameControls
-                    canCallQuarto={canCallQuarto}
-                    onCallQuarto={callQuarto}
                     onNewGame={handleNewGame}
                     onQuit={handleQuit}
                     isGameOver={isGameOver}
-                    disabled={isAIThinking}
                 />
 
                 {/* Instructions - hidden on mobile to save space */}
@@ -335,8 +347,7 @@ function QuartoPlayPage() {
                         <ol className='list-inside list-decimal space-y-1'>
                             <li>Select a piece for your opponent</li>
                             <li>They place it on the board</li>
-                            <li>Get 4 in a row with any shared trait</li>
-                            <li>Call "Quarto!" to win</li>
+                            <li>Get 4 in a row with any shared trait to win!</li>
                         </ol>
                     </div>
                     <KeyboardShortcutsHelp />

@@ -2,9 +2,8 @@ import { useEffect, useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { AppDispatch } from '../../../store';
 import type { Board, AIDifficulty } from '../types/quarto.types';
-import { setAIThinking, applyAIMove, callQuarto } from '../store/quartoSlice';
+import { setAIThinking, applyAIMove } from '../store/quartoSlice';
 import { computeAIMoveAsync, getAIDelayForDifficulty } from '../ai/worker';
-import { hasQuarto } from '../utils/winDetection';
 
 interface UseAIProps {
   enabled: boolean;
@@ -75,26 +74,11 @@ export function useAI({
         return;
       }
 
-      // Apply the move
+      // Apply the move - win detection now happens automatically in the reducer
       if (move.type === 'select' && move.pieceId !== undefined) {
         dispatch(applyAIMove({ type: 'select', pieceId: move.pieceId }));
       } else if (move.type === 'place' && move.position !== undefined) {
         dispatch(applyAIMove({ type: 'place', position: move.position }));
-
-        // After placing, check if AI should call Quarto
-        // Create temporary board to check
-        const tempPositions = [...board.positions];
-        tempPositions[move.position] = selectedPiece!;
-        const tempBoard: Board = { positions: tempPositions };
-
-        if (hasQuarto(tempBoard)) {
-          // Small delay before calling Quarto for dramatic effect
-          setTimeout(() => {
-            if (!abortRef.current) {
-              dispatch(callQuarto());
-            }
-          }, 300);
-        }
       }
     } catch (error) {
       console.error('[useAI] AI move computation failed:', error);

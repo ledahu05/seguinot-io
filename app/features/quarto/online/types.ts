@@ -20,7 +20,7 @@ export type ServerMessage =
   | { type: 'PLAYER_JOINED'; playerName: string; game: Game }
   | { type: 'STATE_UPDATE'; game: Game }
   | { type: 'PLAYER_LEFT'; reason: 'disconnect' | 'forfeit' | 'timeout' }
-  | { type: 'GAME_OVER'; winner: 0 | 1 | 'draw'; game: Game }
+  | { type: 'GAME_OVER'; winner: 0 | 1 | 'draw'; winnerId: string | null; winningPositions: number[]; game: Game }
   | { type: 'ERROR'; code: ErrorCode; message: string };
 
 export type ErrorCode =
