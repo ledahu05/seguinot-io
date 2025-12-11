@@ -1,4 +1,13 @@
-export { quartoReducer } from './quartoSlice';
+export {
+  quartoReducer,
+  animationComplete,
+  setAnimationType,
+  resetAnimation,
+  selectAnimationState,
+  selectIsAnimationPlaying,
+  selectAnimationType,
+  selectWinningPositions,
+} from './quartoSlice';
 
 export {
   startLocalGame,
@@ -7,7 +16,6 @@ export {
   resetGame,
   selectPiece,
   placePiece,
-  callQuarto,
   setAIThinking,
   applyAIMove,
   setConnectionStatus,
@@ -27,7 +35,6 @@ export {
   selectIsMyTurn,
   selectAvailablePieces,
   selectSelectedPiece,
-  selectCanCallQuarto,
   selectWinningLines,
   selectGameStatus,
   selectGamePhase,

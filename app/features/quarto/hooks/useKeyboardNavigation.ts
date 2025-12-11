@@ -7,8 +7,6 @@ interface UseKeyboardNavigationProps {
   disabled: boolean;
   onSelectPiece: (pieceId: number) => void;
   onPlacePiece: (position: number) => void;
-  onCallQuarto: () => void;
-  canCallQuarto: boolean;
   board: (number | null)[];
 }
 
@@ -24,8 +22,6 @@ export function useKeyboardNavigation({
   disabled,
   onSelectPiece,
   onPlacePiece,
-  onCallQuarto,
-  canCallQuarto,
   board,
 }: UseKeyboardNavigationProps): UseKeyboardNavigationReturn {
   const [focusedPieceIndex, setFocusedPieceIndex] = useState<number | null>(null);
@@ -76,15 +72,6 @@ export function useKeyboardNavigation({
       // Activate keyboard mode on any navigation key
       if (['Tab', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', ' '].includes(event.key)) {
         setIsKeyboardActive(true);
-      }
-
-      // Q key for Quarto
-      if (event.key === 'q' || event.key === 'Q') {
-        if (canCallQuarto) {
-          event.preventDefault();
-          onCallQuarto();
-        }
-        return;
       }
 
       // Selecting phase - navigate pieces
@@ -225,10 +212,8 @@ export function useKeyboardNavigation({
       focusedPieceIndex,
       focusedBoardPosition,
       board,
-      canCallQuarto,
       onSelectPiece,
       onPlacePiece,
-      onCallQuarto,
       getEmptyPositions,
       navigateGrid,
     ]

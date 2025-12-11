@@ -1,38 +1,43 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { configureStore } from '@reduxjs/toolkit';
 import { quartoReducer } from '../../../app/features/quarto/store/quartoSlice';
+import type { QuartoState } from '../../../app/features/quarto/types/quarto.types';
 import {
   startLocalGame,
   selectPiece,
   placePiece,
-  callQuarto,
   resetGame,
   selectGame,
   selectBoard,
-  selectCurrentPlayer,
   selectAvailablePieces,
   selectSelectedPiece,
-  selectCanCallQuarto,
   selectIsGameOver,
   selectWinner,
   selectGamePhase,
   selectGameStatus,
+  selectAnimationState,
 } from '../../../app/features/quarto/store';
 
+type TestState = { quarto: QuartoState };
+
+const createTestStore = () => configureStore({
+  reducer: { quarto: quartoReducer },
+});
+
 describe('Quarto Game Flow Integration', () => {
-  let store: ReturnType<typeof configureStore>;
+  let store: ReturnType<typeof createTestStore>;
 
   beforeEach(() => {
-    store = configureStore({
-      reducer: { quarto: quartoReducer },
-    });
+    store = createTestStore();
   });
+
+  const getState = (): TestState => store.getState();
 
   describe('Game Initialization', () => {
     it('should start a local game with correct initial state', () => {
       store.dispatch(startLocalGame({ player1Name: 'Alice', player2Name: 'Bob' }));
 
-      const state = store.getState();
+      const state = getState();
       const game = selectGame(state);
       const board = selectBoard(state);
       const availablePieces = selectAvailablePieces(state);
@@ -54,11 +59,9 @@ describe('Quarto Game Flow Integration', () => {
 
       // Run multiple times to verify randomness
       for (let i = 0; i < 20; i++) {
-        store = configureStore({
-          reducer: { quarto: quartoReducer },
-        });
+        store = createTestStore();
         store.dispatch(startLocalGame({ player1Name: 'P1', player2Name: 'P2' }));
-        const game = selectGame(store.getState());
+        const game = selectGame(getState());
         startingPlayers.push(game?.currentTurn ?? -1);
       }
 
@@ -74,14 +77,14 @@ describe('Quarto Game Flow Integration', () => {
     });
 
     it('should allow selecting a piece during selecting phase', () => {
-      const game = selectGame(store.getState());
+      const game = selectGame(getState());
       const currentTurn = game?.currentTurn;
 
       store.dispatch(selectPiece({ pieceId: 0 }));
 
-      const updatedGame = selectGame(store.getState());
-      const phase = selectGamePhase(store.getState());
-      const selectedPiece = selectSelectedPiece(store.getState());
+      const updatedGame = selectGame(getState());
+      const phase = selectGamePhase(getState());
+      const selectedPiece = selectSelectedPiece(getState());
 
       expect(phase).toBe('placing');
       expect(selectedPiece?.id).toBe(0);
@@ -93,10 +96,10 @@ describe('Quarto Game Flow Integration', () => {
       store.dispatch(selectPiece({ pieceId: 5 }));
       store.dispatch(placePiece({ position: 0 }));
 
-      const board = selectBoard(store.getState());
-      const phase = selectGamePhase(store.getState());
-      const selectedPiece = selectSelectedPiece(store.getState());
-      const availablePieces = selectAvailablePieces(store.getState());
+      const board = selectBoard(getState());
+      const phase = selectGamePhase(getState());
+      const selectedPiece = selectSelectedPiece(getState());
+      const availablePieces = selectAvailablePieces(getState());
 
       expect(phase).toBe('selecting');
       expect(board?.positions[0]).toBe(5);
@@ -113,7 +116,7 @@ describe('Quarto Game Flow Integration', () => {
       store.dispatch(selectPiece({ pieceId: 1 }));
       store.dispatch(placePiece({ position: 5 }));
 
-      const board = selectBoard(store.getState());
+      const board = selectBoard(getState());
 
       // Original piece should still be there
       expect(board?.positions[5]).toBe(0);
@@ -126,7 +129,7 @@ describe('Quarto Game Flow Integration', () => {
       // Try to select the same piece again
       store.dispatch(selectPiece({ pieceId: 7 }));
 
-      const selectedPiece = selectSelectedPiece(store.getState());
+      const selectedPiece = selectSelectedPiece(getState());
       expect(selectedPiece).toBeNull();
     });
   });
@@ -146,8 +149,9 @@ describe('Quarto Game Flow Integration', () => {
         store.dispatch(placePiece({ position: positions[i] }));
       }
 
-      const canCallQuarto = selectCanCallQuarto(store.getState());
-      expect(canCallQuarto).toBe(true);
+      // Auto-detection triggers win on 4th piece placement
+      const isGameOver = selectIsGameOver(getState());
+      expect(isGameOver).toBe(true);
     });
 
     it('should detect a winning line (all same shape)', () => {
@@ -160,12 +164,13 @@ describe('Quarto Game Flow Integration', () => {
         store.dispatch(placePiece({ position: positions[i] }));
       }
 
-      const canCallQuarto = selectCanCallQuarto(store.getState());
-      expect(canCallQuarto).toBe(true);
+      // Auto-detection triggers win on 4th piece placement
+      const isGameOver = selectIsGameOver(getState());
+      expect(isGameOver).toBe(true);
     });
 
-    it('should allow calling Quarto when winning condition exists', () => {
-      // Place winning combination
+    it('should auto-detect win when placing the winning piece', () => {
+      // Place winning combination - win is auto-detected
       const shortPieces = [0, 1, 2, 3]; // All short
       const positions = [0, 1, 2, 3];
 
@@ -174,31 +179,28 @@ describe('Quarto Game Flow Integration', () => {
         store.dispatch(placePiece({ position: positions[i] }));
       }
 
-      store.dispatch(callQuarto());
-
-      const isGameOver = selectIsGameOver(store.getState());
-      const winner = selectWinner(store.getState());
-      const status = selectGameStatus(store.getState());
+      const isGameOver = selectIsGameOver(getState());
+      const winner = selectWinner(getState());
+      const status = selectGameStatus(getState());
+      const animation = selectAnimationState(getState());
 
       expect(isGameOver).toBe(true);
       expect(status).toBe('finished');
       expect(winner).toEqual(expect.any(Number));
+      expect(animation.status).toBe('playing');
+      expect(animation.type).toBe('firework');
     });
 
-    it('should reject invalid Quarto call', () => {
+    it('should not trigger win when no winning line exists', () => {
       // Place pieces without a winning line
       store.dispatch(selectPiece({ pieceId: 0 }));
       store.dispatch(placePiece({ position: 0 }));
       store.dispatch(selectPiece({ pieceId: 15 }));
       store.dispatch(placePiece({ position: 1 }));
 
-      store.dispatch(callQuarto());
-
-      const isGameOver = selectIsGameOver(store.getState());
-      const state = store.getState();
+      const isGameOver = selectIsGameOver(getState());
 
       expect(isGameOver).toBe(false);
-      expect(state.quarto.ui.error).toBeTruthy();
     });
   });
 
@@ -232,8 +234,8 @@ describe('Quarto Game Flow Integration', () => {
         store.dispatch(placePiece({ position: pos }));
       }
 
-      const isGameOver = selectIsGameOver(store.getState());
-      const winner = selectWinner(store.getState());
+      const isGameOver = selectIsGameOver(getState());
+      const winner = selectWinner(getState());
 
       expect(isGameOver).toBe(true);
       expect(winner).toBe('draw');
@@ -247,13 +249,13 @@ describe('Quarto Game Flow Integration', () => {
       store.dispatch(placePiece({ position: 5 }));
       store.dispatch(resetGame());
 
-      const game = selectGame(store.getState());
+      const game = selectGame(getState());
       expect(game).toBeNull();
     });
   });
 
   describe('Complete Game Flow', () => {
-    it('should play a complete game to victory', () => {
+    it('should play a complete game to victory with auto-detection', () => {
       store.dispatch(startLocalGame({ player1Name: 'Alice', player2Name: 'Bob' }));
 
       // Place pieces to create a winning diagonal with tall pieces (8, 9, 10, 11 are all tall)
@@ -265,21 +267,17 @@ describe('Quarto Game Flow Integration', () => {
         store.dispatch(placePiece({ position: diagonalPositions[i] }));
       }
 
-      // Verify Quarto can be called
-      const canCallQuarto = selectCanCallQuarto(store.getState());
-      expect(canCallQuarto).toBe(true);
-
-      // Call Quarto
-      store.dispatch(callQuarto());
-
-      // Verify game ended with a winner
-      const game = selectGame(store.getState());
-      const isGameOver = selectIsGameOver(store.getState());
+      // Win is auto-detected on the 4th piece placement
+      const game = selectGame(getState());
+      const isGameOver = selectIsGameOver(getState());
+      const animation = selectAnimationState(getState());
 
       expect(isGameOver).toBe(true);
       expect(game?.status).toBe('finished');
       expect(game?.winner).not.toBeNull();
       expect(game?.winningLine).toEqual(diagonalPositions);
+      expect(animation.status).toBe('playing');
+      expect(animation.winningPositions).toEqual(diagonalPositions);
     });
   });
 });

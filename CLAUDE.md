@@ -8,6 +8,10 @@
 - In-memory for local games; server-side session storage for online multiplayer rooms (002-quarto-game)
 - TypeScript 5.x, React 19, Node.js 20+ + TanStack Start, React Three Fiber, Drei, Redux Toolkit, PartyKit, partysocket (002-quarto-game-phase7)
 - In-memory for local/AI games; PartyKit room state for online multiplayer (002-quarto-game-phase7)
+- TypeScript 5.x, React 19, Node.js 20+ + TanStack Start, React Three Fiber, Drei, Redux Toolkit, PartyKit, Framer Motion (for 2D particle effects) (003-quarto-win-animation)
+- In-memory game state (existing) (003-quarto-win-animation)
+- TypeScript 5.7, React 19, Node.js 20+ (003-quarto-win-animation)
+- In-memory game state (Redux) (003-quarto-win-animation)
 
 ## Recent Changes
 - 001-portfolio-site: Added TypeScript 5.x, React 19, Node.js 20+

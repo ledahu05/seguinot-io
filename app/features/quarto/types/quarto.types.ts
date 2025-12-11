@@ -88,6 +88,7 @@ export interface QuartoState {
     connectionStatus: 'disconnected' | 'connecting' | 'connected';
     error: string | null;
   };
+  animation: AnimationState;
 }
 
 // Zod Schemas
@@ -171,3 +172,20 @@ export const AI_DEPTHS: Record<AIDifficulty, number> = {
   medium: 2,
   hard: 3
 };
+
+// Animation types for win/lose celebrations
+export type AnimationStatus = 'idle' | 'playing' | 'complete';
+export type AnimationType = 'firework' | 'defeat' | null;
+
+export interface AnimationState {
+  status: AnimationStatus;
+  type: AnimationType;
+  startedAt: number | null;
+  duration: number;  // 5000-10000ms
+  winningPositions: number[];
+}
+
+// Animation constants
+export const ANIMATION_DURATION_MIN = 5000;
+export const ANIMATION_DURATION_MAX = 10000;
+export const FIREWORK_COLORS = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1'];

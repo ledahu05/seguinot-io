@@ -5,8 +5,8 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { Board3D, PieceTray, Piece3D, GameStatus } from '@/features/quarto/components';
-import { useResponsiveCamera } from '@/features/quarto/hooks';
+import { Board3D, PieceTray, Piece3D, GameStatus, WinCelebration } from '@/features/quarto/components';
+import { useResponsiveCamera, useWinAnimation } from '@/features/quarto/hooks';
 import { useOnlineGame } from '@/features/quarto/online';
 import {
   selectGame,
@@ -41,6 +41,10 @@ function OnlineGamePage() {
   const dispatch = useDispatch();
   const cameraConfig = useResponsiveCamera();
 
+  // Win animation state
+  const { isAnimationPlaying, animationType, duration, handleAnimationComplete } =
+    useWinAnimation();
+
   // Reset any previous game state on mount
   useEffect(() => {
     dispatch(resetGame());
@@ -69,7 +73,6 @@ function OnlineGamePage() {
     joinRoom,
     selectPiece: sendSelectPiece,
     placePiece: sendPlacePiece,
-    callQuarto: sendCallQuarto,
     leaveRoom,
     reconnect,
   } = useOnlineGame({
@@ -136,12 +139,6 @@ function OnlineGamePage() {
     },
     [gameReady, game, playerIndex, sendPlacePiece]
   );
-
-  // Handle Quarto call
-  const handleCallQuarto = useCallback(() => {
-    if (!gameReady || game?.currentTurn !== playerIndex) return;
-    sendCallQuarto();
-  }, [gameReady, game, playerIndex, sendCallQuarto]);
 
   // Handle leaving
   const handleLeave = useCallback(() => {
@@ -215,35 +212,18 @@ function OnlineGamePage() {
     );
   }
 
-  // Game over screen
-  if (isGameOver) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-900 p-4">
-        <div className="text-center">
-          <h2 className="mb-4 text-3xl font-bold text-amber-400">
-            {winner === 'draw'
-              ? "It's a Draw!"
-              : winner === playerIndex
-                ? 'You Win!'
-                : 'You Lose!'}
-          </h2>
-          {winnerPlayer && winner !== 'draw' && (
-            <p className="mb-8 text-lg text-slate-400">{winnerPlayer.name} wins the game!</p>
-          )}
-          <button
-            onClick={() => navigate({ to: '/games/quarto' })}
-            className="rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 px-8 py-4 text-lg font-bold text-white hover:from-emerald-400 hover:to-teal-400"
-          >
-            Back to Menu
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   // Main game view
   return (
     <div className="flex h-screen flex-col bg-slate-900 md:flex-row">
+      {/* Win/Defeat Animation Overlay */}
+      <WinCelebration
+        animationType={animationType}
+        isPlaying={isAnimationPlaying}
+        duration={duration}
+        winnerName={winnerPlayer?.name}
+        onAnimationComplete={handleAnimationComplete}
+      />
+
       {/* Main game area (board + tray) */}
       <div className="flex flex-1 flex-col">
         {/* Board Canvas */}
@@ -328,35 +308,48 @@ function OnlineGamePage() {
           roomCode={room}
         />
 
-        {/* Turn indicator */}
+        {/* Turn indicator / Game Over message */}
         <div className="text-center">
-          <span
-            className={`inline-block rounded-full px-4 py-1 text-sm font-medium ${
-              game?.currentTurn === playerIndex
-                ? 'bg-emerald-500/20 text-emerald-400'
-                : 'bg-slate-700/50 text-slate-400'
-            }`}
-          >
-            {game?.currentTurn === playerIndex
-              ? game?.phase === 'selecting'
-                ? 'Select a piece for your opponent'
-                : 'Place the piece on the board'
-              : "Opponent's turn"}
-          </span>
+          {isGameOver ? (
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold text-amber-400">
+                {winner === 'draw'
+                  ? "It's a Draw!"
+                  : winner === playerIndex
+                    ? 'You Win!'
+                    : 'You Lose!'}
+              </h2>
+              {winnerPlayer && winner !== 'draw' && (
+                <p className="text-sm text-slate-400">{winnerPlayer.name} wins the game!</p>
+              )}
+              {!isAnimationPlaying && (
+                <button
+                  onClick={() => navigate({ to: '/games/quarto' })}
+                  className="w-full rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-3 font-bold text-white hover:from-emerald-400 hover:to-teal-400"
+                >
+                  Back to Menu
+                </button>
+              )}
+            </div>
+          ) : (
+            <span
+              className={`inline-block rounded-full px-4 py-1 text-sm font-medium ${
+                game?.currentTurn === playerIndex
+                  ? 'bg-emerald-500/20 text-emerald-400'
+                  : 'bg-slate-700/50 text-slate-400'
+              }`}
+            >
+              {game?.currentTurn === playerIndex
+                ? game?.phase === 'selecting'
+                  ? 'Select a piece for your opponent'
+                  : 'Place the piece on the board'
+                : "Opponent's turn"}
+            </span>
+          )}
         </div>
 
         {/* Game Controls */}
         <div className="mt-auto space-y-3">
-          {/* Quarto Button */}
-          {gameReady && game?.currentTurn === playerIndex && game?.phase === 'selecting' && (
-            <button
-              onClick={handleCallQuarto}
-              className="w-full rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 px-8 py-3 text-lg font-bold text-black transition-all hover:from-amber-400 hover:to-yellow-400 hover:shadow-lg hover:shadow-amber-500/25"
-            >
-              Call Quarto!
-            </button>
-          )}
-
           {/* Leave Button */}
           <button
             onClick={handleLeave}
@@ -373,8 +366,7 @@ function OnlineGamePage() {
             <ol className="list-inside list-decimal space-y-1">
               <li>Select a piece for your opponent</li>
               <li>They place it on the board</li>
-              <li>Get 4 in a row with any shared trait</li>
-              <li>Call "Quarto!" to win</li>
+              <li>Get 4 in a row with any shared trait to win!</li>
             </ol>
           </div>
         </div>

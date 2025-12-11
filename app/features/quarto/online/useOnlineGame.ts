@@ -9,6 +9,7 @@ import {
   clearOnlineRoom,
   handlePlayerLeft,
   setError,
+  setAnimationType,
 } from '../store/quartoSlice';
 
 // Session storage keys
@@ -27,7 +28,6 @@ interface UseOnlineGameReturn {
   joinRoom: () => void;
   selectPiece: (pieceId: number) => void;
   placePiece: (position: number) => void;
-  callQuarto: () => void;
   leaveRoom: () => void;
   reconnect: () => boolean;
 }
@@ -109,13 +109,26 @@ export function useOnlineGame({
           dispatch(handlePlayerLeft({ reason: message.reason }));
           break;
 
-        case 'GAME_OVER':
+        case 'GAME_OVER': {
           dispatch(setOnlineGame(message.game));
+          // Determine animation type based on whether we won or lost
+          const storedPlayerId = sessionStorage.getItem(PLAYER_ID_KEY);
+          if (message.winner === 'draw') {
+            // No animation for draw
+            dispatch(setAnimationType(null));
+          } else if (message.winnerId === storedPlayerId) {
+            // We won - show fireworks
+            dispatch(setAnimationType('firework'));
+          } else {
+            // We lost - show defeat animation
+            dispatch(setAnimationType('defeat'));
+          }
           // Don't clear online room - we need playerIndex to show win/lose result
           // Only clear session storage to prevent reconnection to finished game
           sessionStorage.removeItem(PLAYER_ID_KEY);
           sessionStorage.removeItem(ROOM_ID_KEY);
           break;
+        }
 
         case 'ERROR':
           setState((prev) => ({
@@ -174,10 +187,6 @@ export function useOnlineGame({
     [send]
   );
 
-  const callQuarto = useCallback(() => {
-    send({ type: 'CALL_QUARTO' });
-  }, [send]);
-
   const leaveRoom = useCallback(() => {
     send({ type: 'LEAVE_ROOM' });
     close();
@@ -204,7 +213,6 @@ export function useOnlineGame({
     joinRoom,
     selectPiece,
     placePiece,
-    callQuarto,
     leaveRoom,
     reconnect,
   };

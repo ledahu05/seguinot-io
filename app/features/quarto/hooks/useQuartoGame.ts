@@ -8,7 +8,6 @@ import {
   resetGame,
   selectPiece,
   placePiece,
-  callQuarto,
   setHoveredPosition,
   setError,
   selectGame,
@@ -17,7 +16,6 @@ import {
   selectCurrentPlayer,
   selectAvailablePieces,
   selectSelectedPiece,
-  selectCanCallQuarto,
   selectWinningLines,
   selectIsGameOver,
   selectWinner,
@@ -38,7 +36,6 @@ export function useQuartoGame() {
   const currentPlayer = useSelector(selectCurrentPlayer);
   const availablePieces = useSelector(selectAvailablePieces);
   const selectedPiece = useSelector(selectSelectedPiece);
-  const canCallQuarto = useSelector(selectCanCallQuarto);
   const winningLines = useSelector(selectWinningLines);
   const isGameOver = useSelector(selectIsGameOver);
   const winner = useSelector(selectWinner);
@@ -101,11 +98,6 @@ export function useQuartoGame() {
     [dispatch, isPlaying, phase]
   );
 
-  const handleCallQuarto = useCallback(() => {
-    if (!canCallQuarto) return;
-    dispatch(callQuarto());
-  }, [dispatch, canCallQuarto]);
-
   const handleHoverPosition = useCallback(
     (position: number | null) => {
       dispatch(setHoveredPosition(position));
@@ -125,7 +117,6 @@ export function useQuartoGame() {
     availablePieces,
     selectedPiece,
     selectedPieceDescription,
-    canCallQuarto,
     winningPositions,
     isGameOver,
     isDraw,
@@ -146,7 +137,6 @@ export function useQuartoGame() {
     resetGame: handleResetGame,
     selectPiece: handleSelectPiece,
     placePiece: handlePlacePiece,
-    callQuarto: handleCallQuarto,
     hoverPosition: handleHoverPosition,
     clearError: handleClearError,
   };

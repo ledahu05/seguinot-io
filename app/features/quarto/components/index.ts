@@ -6,3 +6,5 @@ export { GameControls } from './GameControls';
 export { CameraDebugOverlay } from './CameraDebugOverlay';
 export { KeyboardShortcutsHelp } from './KeyboardShortcutsHelp';
 export { Canvas3DLoader } from './Canvas3DLoader';
+export { WinCelebration } from './animations';
+export type { WinCelebrationProps } from './animations';

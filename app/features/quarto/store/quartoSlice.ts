@@ -1,6 +1,19 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { Game, QuartoState, AIDifficulty, GameMove } from '../types/quarto.types';
+import type { Game, QuartoState, AIDifficulty, GameMove, AnimationState, AnimationType } from '../types/quarto.types';
+import { ANIMATION_DURATION_MIN, ANIMATION_DURATION_MAX } from '../types/quarto.types';
 import { createEmptyBoard, findWinningLine, isBoardFull } from '../utils/winDetection';
+
+const initialAnimationState: AnimationState = {
+  status: 'idle',
+  type: null,
+  startedAt: null,
+  duration: 7000,
+  winningPositions: [],
+};
+
+function getRandomAnimationDuration(): number {
+  return ANIMATION_DURATION_MIN + Math.random() * (ANIMATION_DURATION_MAX - ANIMATION_DURATION_MIN);
+}
 
 const initialState: QuartoState = {
   game: null,
@@ -17,6 +30,7 @@ const initialState: QuartoState = {
     connectionStatus: 'disconnected',
     error: null,
   },
+  animation: initialAnimationState,
 };
 
 function generateId(): string {
@@ -156,8 +170,22 @@ const quartoSlice = createSlice({
       state.game.history.push(move);
       state.game.updatedAt = Date.now();
 
-      // Check for draw (board full)
-      if (isBoardFull(state.game.board)) {
+      // Auto-detect Quarto win
+      const winResult = findWinningLine(state.game.board);
+      if (winResult) {
+        state.game.status = 'finished';
+        state.game.winner = state.game.currentTurn;
+        state.game.winningLine = winResult.positions;
+        // Trigger win animation
+        state.animation = {
+          status: 'playing',
+          type: 'firework', // Default; online mode will set based on role
+          startedAt: Date.now(),
+          duration: getRandomAnimationDuration(),
+          winningPositions: winResult.positions,
+        };
+      } else if (isBoardFull(state.game.board)) {
+        // Check for draw (board full)
         state.game.status = 'finished';
         state.game.winner = 'draw';
       }
@@ -245,7 +273,20 @@ const quartoSlice = createSlice({
         state.game.history.push(move);
         state.game.updatedAt = Date.now();
 
-        if (isBoardFull(state.game.board)) {
+        // Auto-detect Quarto win (for AI moves)
+        const winResult = findWinningLine(state.game.board);
+        if (winResult) {
+          state.game.status = 'finished';
+          state.game.winner = state.game.currentTurn;
+          state.game.winningLine = winResult.positions;
+          state.animation = {
+            status: 'playing',
+            type: 'firework',
+            startedAt: Date.now(),
+            duration: getRandomAnimationDuration(),
+            winningPositions: winResult.positions,
+          };
+        } else if (isBoardFull(state.game.board)) {
           state.game.status = 'finished';
           state.game.winner = 'draw';
         }
@@ -308,6 +349,24 @@ const quartoSlice = createSlice({
     setError(state, action: PayloadAction<string | null>) {
       state.ui.error = action.payload;
     },
+
+    // Animation Actions
+    animationComplete(state) {
+      state.animation.status = 'complete';
+    },
+
+    setAnimationType(state, action: PayloadAction<AnimationType>) {
+      state.animation.type = action.payload;
+      if (action.payload) {
+        state.animation.status = 'playing';
+        state.animation.startedAt = Date.now();
+        state.animation.duration = getRandomAnimationDuration();
+      }
+    },
+
+    resetAnimation(state) {
+      state.animation = initialAnimationState;
+    },
   },
 });
 
@@ -328,6 +387,17 @@ export const {
   setSelectedPosition,
   setHoveredPosition,
   setError,
+  animationComplete,
+  setAnimationType,
+  resetAnimation,
 } = quartoSlice.actions;
 
 export const quartoReducer = quartoSlice.reducer;
+
+// Animation Selectors
+export const selectAnimationState = (state: { quarto: QuartoState }) => state.quarto.animation;
+export const selectIsAnimationPlaying = (state: { quarto: QuartoState }) =>
+  state.quarto.animation.status === 'playing';
+export const selectAnimationType = (state: { quarto: QuartoState }) => state.quarto.animation.type;
+export const selectWinningPositions = (state: { quarto: QuartoState }) =>
+  state.quarto.animation.winningPositions;
