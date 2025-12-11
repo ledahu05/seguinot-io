@@ -379,7 +379,13 @@ function QuartoMenuPage() {
         )}
 
         {/* Footer */}
-        <div className="mt-12 text-center text-sm text-slate-500">
+        <div className="mt-12 space-y-2 text-center text-sm text-slate-500">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1 text-slate-400 transition-colors hover:text-amber-400"
+          >
+            &larr; Back to Portfolio
+          </Link>
           <p>Created with React Three Fiber</p>
         </div>
       </div>
