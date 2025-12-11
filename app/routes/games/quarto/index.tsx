@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate, Link } from '@tanstack/react-router';
 import { useQuartoGame } from '@/features/quarto/hooks';
 import type { AIDifficulty } from '@/features/quarto/types/quarto.types';
 
@@ -80,6 +80,17 @@ function QuartoMenuPage() {
         {/* Mode Selection */}
         {!selectedMode && (
           <div className="space-y-3 sm:space-y-4">
+            {/* Tutorial Button - Prominent placement for new players */}
+            <Link
+              to="/games/quarto/rules"
+              className="block w-full rounded-lg bg-gradient-to-r from-sky-500 to-cyan-500 p-3 text-left transition-all hover:from-sky-400 hover:to-cyan-400 hover:shadow-lg hover:shadow-sky-500/25 sm:p-4"
+            >
+              <h2 className="text-lg font-bold text-white sm:text-xl">📖 How to Play</h2>
+              <p className="text-sm text-sky-100">
+                Learn the rules in 2 minutes
+              </p>
+            </Link>
+
             <button
               onClick={() => setSelectedMode('local')}
               className="w-full rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 p-3 text-left transition-all hover:from-amber-400 hover:to-yellow-400 hover:shadow-lg hover:shadow-amber-500/25 sm:p-4"

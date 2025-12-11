@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Keyboard, X } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
+import { Keyboard, X, BookOpen } from 'lucide-react';
 
 interface ShortcutGroup {
   title: string;
@@ -129,8 +130,20 @@ export function KeyboardShortcutsHelp({ className = '' }: KeyboardShortcutsHelpP
               ))}
             </div>
 
-            {/* Footer */}
+            {/* Game Rules Link */}
             <div className="mt-5 border-t border-slate-700 pt-4">
+              <Link
+                to="/games/quarto/rules"
+                className="flex items-center justify-center gap-2 rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-600"
+                onClick={() => setIsOpen(false)}
+              >
+                <BookOpen className="h-4 w-4" />
+                <span>View Game Rules</span>
+              </Link>
+            </div>
+
+            {/* Footer */}
+            <div className="mt-4 pt-3">
               <p className="text-center text-xs text-slate-500">
                 Press <kbd className="rounded bg-slate-700 px-1.5 py-0.5 font-mono">Esc</kbd> or click outside to close
               </p>

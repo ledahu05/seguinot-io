@@ -14,6 +14,10 @@ interface Piece3DProps {
   onClick?: () => void;
   onPointerOver?: () => void;
   onPointerOut?: () => void;
+  /** Custom scale factor (default: 1) */
+  scale?: number;
+  /** Opacity for dimmed/used pieces (default: 1) */
+  opacity?: number;
 }
 
 // Color constants - wood-like tones
@@ -44,14 +48,17 @@ export function Piece3D({
   onClick,
   onPointerOver,
   onPointerOut,
+  scale: customScale = 1,
+  opacity = 1,
 }: Piece3DProps) {
   const groupRef = useRef<THREE.Group>(null);
   const prefersReducedMotion = useReducedMotion();
 
   // Animation for selection/hover/focus states
   // With reduced motion, use instant transitions
+  const baseScale = isSelected ? 1.15 : (isHovered || isFocused) ? 1.05 : 1;
   const { scale, positionY } = useSpring({
-    scale: isSelected ? 1.15 : (isHovered || isFocused) ? 1.05 : 1,
+    scale: baseScale * customScale,
     positionY: isSelected ? position[1] + 0.2 : (isFocused ? position[1] + 0.1 : position[1]),
     config: prefersReducedMotion
       ? { tension: 1000, friction: 100 } // Instant transition
@@ -83,9 +90,11 @@ export function Piece3D({
         metalness={0.1}
         emissive={emissive}
         emissiveIntensity={intensity}
+        transparent={opacity < 1}
+        opacity={opacity}
       />
     );
-  }, [color, isSelected, isHovered, isFocused]);
+  }, [color, isSelected, isHovered, isFocused, opacity]);
 
   // Hollow interior material
   const hollowMaterial = useMemo(() => {
@@ -94,9 +103,11 @@ export function Piece3D({
         color={new THREE.Color(color).multiplyScalar(HOLLOW_COLOR_MULT).getStyle()}
         roughness={0.9}
         metalness={0.0}
+        transparent={opacity < 1}
+        opacity={opacity}
       />
     );
-  }, [color]);
+  }, [color, opacity]);
 
   // Render decorative rings for tall pieces
   const renderTallRings = () => {

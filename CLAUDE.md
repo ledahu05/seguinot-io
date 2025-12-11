@@ -12,6 +12,8 @@
 - In-memory game state (existing) (003-quarto-win-animation)
 - TypeScript 5.7, React 19, Node.js 20+ (003-quarto-win-animation)
 - In-memory game state (Redux) (003-quarto-win-animation)
+- TypeScript 5.7, React 19 + React Three Fiber, Drei, Framer Motion, TanStack Router, Tailwind CSS v4 (004-quarto-rules-page)
+- N/A (stateless page, no persistence) (004-quarto-rules-page)
 
 ## Recent Changes
 - 001-portfolio-site: Added TypeScript 5.x, React 19, Node.js 20+
