@@ -88,3 +88,77 @@ export const WINNING_LINES_CONFIG: WinningLineConfig[] = [
     svgPath: 'M 95 5 L 5 95',
   },
 ];
+
+/**
+ * 2x2 Square winning configurations for advanced rules overlay
+ * SVG viewBox is 100x100 units
+ * Each square is a rectangle around 4 adjacent cells
+ */
+export const WINNING_SQUARES_CONFIG: WinningLineConfig[] = [
+  // Row 0-1 squares
+  {
+    id: 'sq-00',
+    name: 'Square 1',
+    category: 'square',
+    positions: [0, 1, 4, 5],
+    svgPath: 'M 2 2 L 48 2 L 48 48 L 2 48 Z',
+  },
+  {
+    id: 'sq-01',
+    name: 'Square 2',
+    category: 'square',
+    positions: [1, 2, 5, 6],
+    svgPath: 'M 27 2 L 73 2 L 73 48 L 27 48 Z',
+  },
+  {
+    id: 'sq-02',
+    name: 'Square 3',
+    category: 'square',
+    positions: [2, 3, 6, 7],
+    svgPath: 'M 52 2 L 98 2 L 98 48 L 52 48 Z',
+  },
+  // Row 1-2 squares
+  {
+    id: 'sq-10',
+    name: 'Square 4',
+    category: 'square',
+    positions: [4, 5, 8, 9],
+    svgPath: 'M 2 27 L 48 27 L 48 73 L 2 73 Z',
+  },
+  {
+    id: 'sq-11',
+    name: 'Square 5',
+    category: 'square',
+    positions: [5, 6, 9, 10],
+    svgPath: 'M 27 27 L 73 27 L 73 73 L 27 73 Z',
+  },
+  {
+    id: 'sq-12',
+    name: 'Square 6',
+    category: 'square',
+    positions: [6, 7, 10, 11],
+    svgPath: 'M 52 27 L 98 27 L 98 73 L 52 73 Z',
+  },
+  // Row 2-3 squares
+  {
+    id: 'sq-20',
+    name: 'Square 7',
+    category: 'square',
+    positions: [8, 9, 12, 13],
+    svgPath: 'M 2 52 L 48 52 L 48 98 L 2 98 Z',
+  },
+  {
+    id: 'sq-21',
+    name: 'Square 8',
+    category: 'square',
+    positions: [9, 10, 13, 14],
+    svgPath: 'M 27 52 L 73 52 L 73 98 L 27 98 Z',
+  },
+  {
+    id: 'sq-22',
+    name: 'Square 9',
+    category: 'square',
+    positions: [10, 11, 14, 15],
+    svgPath: 'M 52 52 L 98 52 L 98 98 L 52 98 Z',
+  },
+];

@@ -14,6 +14,7 @@ interface UseAIProps {
   phase: 'selecting' | 'placing' | null;
   difficulty: AIDifficulty;
   gameStatus: 'playing' | 'finished' | 'waiting' | null;
+  advancedRules?: boolean;
 }
 
 interface UseAIReturn {
@@ -34,6 +35,7 @@ export function useAI({
   phase,
   difficulty,
   gameStatus,
+  advancedRules = false,
 }: UseAIProps): UseAIReturn {
   const dispatch = useDispatch<AppDispatch>();
   const isComputingRef = useRef(false);
@@ -59,14 +61,15 @@ export function useAI({
       // Get delay based on difficulty
       const minDelay = getAIDelayForDifficulty(difficulty);
 
-      // Compute the AI's move
+      // Compute the AI's move (pass advancedRules for 2x2 square detection)
       const move = await computeAIMoveAsync(
         board,
         availablePieces,
         selectedPiece,
         phase,
         difficulty,
-        minDelay
+        minDelay,
+        advancedRules
       );
 
       // Check if we should abort (game state changed)
@@ -95,6 +98,7 @@ export function useAI({
     phase,
     difficulty,
     gameStatus,
+    advancedRules,
     dispatch,
   ]);
 

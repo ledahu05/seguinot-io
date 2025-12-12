@@ -35,19 +35,20 @@ export function getAIMove(
   availablePieces: number[],
   selectedPiece: number | null,
   phase: 'selecting' | 'placing',
-  difficulty: AIDifficulty
+  difficulty: AIDifficulty,
+  advancedRules = false
 ): AIMove {
   const depth = AI_DEPTHS[difficulty];
 
   if (phase === 'selecting') {
     // AI needs to select a piece to give to opponent
-    return selectPieceForOpponent(board, availablePieces, depth);
+    return selectPieceForOpponent(board, availablePieces, depth, advancedRules);
   } else {
     // AI needs to place the selected piece
     if (selectedPiece === null) {
       throw new Error('No piece selected for placement');
     }
-    return placePiece(board, selectedPiece, availablePieces, depth);
+    return placePiece(board, selectedPiece, availablePieces, depth, advancedRules);
   }
 }
 
@@ -58,7 +59,8 @@ export function getAIMove(
 export function selectPieceForOpponent(
   board: Board,
   availablePieces: number[],
-  depth: number
+  depth: number,
+  advancedRules = false
 ): AIMove {
   if (availablePieces.length === 0) {
     throw new Error('No pieces available');
@@ -92,8 +94,8 @@ export function selectPieceForOpponent(
       const tempBoard = simulatePlacement(board, position, pieceId);
       const remainingPieces = availablePieces.filter(id => id !== pieceId);
 
-      // Check for immediate Quarto
-      if (hasQuarto(tempBoard)) {
+      // Check for immediate Quarto (including 2x2 squares if advancedRules)
+      if (hasQuarto(tempBoard, advancedRules)) {
         // Opponent wins - worst case
         minOpponentScore = -100000;
         break;
@@ -108,7 +110,8 @@ export function selectPieceForOpponent(
         depth - 1,
         -Infinity,
         Infinity,
-        false // AI is minimizing (opponent's best move)
+        false, // AI is minimizing (opponent's best move)
+        advancedRules
       );
 
       minOpponentScore = Math.min(minOpponentScore, score);
@@ -135,7 +138,8 @@ export function placePiece(
   board: Board,
   pieceId: number,
   availablePieces: number[],
-  depth: number
+  depth: number,
+  advancedRules = false
 ): AIMove {
   const emptyPositions = getEmptyPositions(board);
 
@@ -143,10 +147,10 @@ export function placePiece(
     throw new Error('No empty positions');
   }
 
-  // Check for immediate winning move
+  // Check for immediate winning move (including 2x2 squares if advancedRules)
   for (const position of emptyPositions) {
     const tempBoard = simulatePlacement(board, position, pieceId);
-    if (hasQuarto(tempBoard)) {
+    if (hasQuarto(tempBoard, advancedRules)) {
       return {
         type: 'place',
         position,
@@ -180,7 +184,8 @@ export function placePiece(
       depth - 1,
       -Infinity,
       Infinity,
-      true // AI is maximizing
+      true, // AI is maximizing
+      advancedRules
     );
 
     if (score > bestMove.score) {
@@ -236,10 +241,11 @@ function minimaxEval(
   depth: number,
   alpha: number,
   beta: number,
-  isMaximizing: boolean
+  isMaximizing: boolean,
+  advancedRules = false
 ): number {
-  // Terminal conditions
-  if (hasQuarto(board)) {
+  // Terminal conditions (including 2x2 squares if advancedRules)
+  if (hasQuarto(board, advancedRules)) {
     return isMaximizing ? -100000 : 100000;
   }
 
@@ -267,7 +273,8 @@ function minimaxEval(
           depth - 1,
           alpha,
           beta,
-          false // Opponent's turn to place
+          false, // Opponent's turn to place
+          advancedRules
         );
 
         maxEval = Math.max(maxEval, evalScore);
@@ -289,7 +296,8 @@ function minimaxEval(
           depth - 1,
           alpha,
           beta,
-          true // AI's turn to place
+          true, // AI's turn to place
+          advancedRules
         );
 
         minEval = Math.min(minEval, evalScore);
@@ -314,8 +322,8 @@ function minimaxEval(
       for (const position of emptyPositions) {
         const tempBoard = simulatePlacement(board, position, selectedPiece);
 
-        // Check for immediate win
-        if (hasQuarto(tempBoard)) {
+        // Check for immediate win (including 2x2 squares if advancedRules)
+        if (hasQuarto(tempBoard, advancedRules)) {
           return 100000;
         }
 
@@ -327,7 +335,8 @@ function minimaxEval(
           depth - 1,
           alpha,
           beta,
-          true // AI selects next
+          true, // AI selects next
+          advancedRules
         );
 
         maxEval = Math.max(maxEval, evalScore);
@@ -342,8 +351,8 @@ function minimaxEval(
       for (const position of emptyPositions) {
         const tempBoard = simulatePlacement(board, position, selectedPiece);
 
-        // Check for immediate loss
-        if (hasQuarto(tempBoard)) {
+        // Check for immediate loss (including 2x2 squares if advancedRules)
+        if (hasQuarto(tempBoard, advancedRules)) {
           return -100000;
         }
 
@@ -355,7 +364,8 @@ function minimaxEval(
           depth - 1,
           alpha,
           beta,
-          false // Opponent selects next
+          false, // Opponent selects next
+          advancedRules
         );
 
         minEval = Math.min(minEval, evalScore);
@@ -413,7 +423,8 @@ export function getAIMoveWithRandomness(
   availablePieces: number[],
   selectedPiece: number | null,
   phase: 'selecting' | 'placing',
-  difficulty: AIDifficulty
+  difficulty: AIDifficulty,
+  advancedRules = false
 ): AIMove {
   const randomChance = {
     easy: 0.6,
@@ -425,5 +436,5 @@ export function getAIMoveWithRandomness(
     return getRandomMove(board, availablePieces, selectedPiece, phase);
   }
 
-  return getAIMove(board, availablePieces, selectedPiece, phase, difficulty);
+  return getAIMove(board, availablePieces, selectedPiece, phase, difficulty, advancedRules);
 }

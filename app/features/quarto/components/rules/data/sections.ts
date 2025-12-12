@@ -65,6 +65,18 @@ Examples of winning lines:
     hasInteractive: true,
   },
   {
+    id: 'advanced',
+    title: 'Advanced Variation: 2×2 Squares',
+    content: `In addition to lines, you can also win by creating a **2×2 square** of 4 pieces that share at least one attribute.
+
+This adds **9 extra winning patterns** to the standard 10 lines, for a total of **19 possible ways to win!**
+
+The 9 squares are formed by adjacent cells in a 2×2 arrangement anywhere on the board.
+
+Toggle the overlay to see all possible 2×2 squares.`,
+    hasInteractive: true,
+  },
+  {
     id: 'strategy',
     title: 'One Tip Before You Play',
     content: `Remember: you choose which piece your opponent must play.

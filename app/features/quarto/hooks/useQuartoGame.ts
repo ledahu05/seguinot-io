@@ -65,15 +65,15 @@ export function useQuartoGame() {
 
   // Actions
   const handleStartLocalGame = useCallback(
-    (player1Name: string, player2Name: string) => {
-      dispatch(startLocalGame({ player1Name, player2Name }));
+    (player1Name: string, player2Name: string, advancedRules = false) => {
+      dispatch(startLocalGame({ player1Name, player2Name, advancedRules }));
     },
     [dispatch]
   );
 
   const handleStartAIGame = useCallback(
-    (playerName: string, difficulty: AIDifficulty, playerGoesFirst: boolean) => {
-      dispatch(startAIGame({ playerName, difficulty, playerGoesFirst }));
+    (playerName: string, difficulty: AIDifficulty, playerGoesFirst: boolean, advancedRules = false) => {
+      dispatch(startAIGame({ playerName, difficulty, playerGoesFirst, advancedRules }));
     },
     [dispatch]
   );

@@ -15,6 +15,7 @@ export interface AIWorkerRequest {
   selectedPiece: number | null;
   phase: 'selecting' | 'placing';
   difficulty: AIDifficulty;
+  advancedRules?: boolean;
 }
 
 export interface AIWorkerResponse {
@@ -34,7 +35,8 @@ export function handleWorkerMessage(request: AIWorkerRequest): AIWorkerResponse 
       request.availablePieces,
       request.selectedPiece,
       request.phase,
-      request.difficulty
+      request.difficulty,
+      request.advancedRules ?? false
     );
 
     return {
@@ -60,7 +62,8 @@ export function computeAIMoveAsync(
   selectedPiece: number | null,
   phase: 'selecting' | 'placing',
   difficulty: AIDifficulty,
-  minDelay: number = 500
+  minDelay: number = 500,
+  advancedRules = false
 ): Promise<AIMove> {
   return new Promise((resolve, reject) => {
     const startTime = Date.now();
@@ -73,7 +76,8 @@ export function computeAIMoveAsync(
           availablePieces,
           selectedPiece,
           phase,
-          difficulty
+          difficulty,
+          advancedRules
         );
 
         // Ensure minimum delay for better UX
