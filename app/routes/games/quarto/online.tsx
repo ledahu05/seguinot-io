@@ -5,7 +5,7 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { Board3D, PieceTray, Piece3D, GameStatus, WinCelebration } from '@/features/quarto/components';
+import { Board3D, PieceTray, Piece3D, GameStatus, WinCelebration, ShareRoomButton } from '@/features/quarto/components';
 import { useResponsiveCamera, useWinAnimation } from '@/features/quarto/hooks';
 import { useOnlineGame } from '@/features/quarto/online';
 import {
@@ -174,13 +174,14 @@ function OnlineGamePage() {
         <div className="text-center">
           <h2 className="mb-4 text-2xl font-bold text-white">Waiting for Opponent</h2>
 
-          <div className="mb-8 rounded-lg bg-slate-800 p-6">
-            <p className="mb-2 text-sm text-slate-400">Share this room code:</p>
+          <div className="mb-6 rounded-lg bg-slate-800 p-6">
+            <p className="mb-2 text-sm text-slate-400">Room Code:</p>
             <p className="font-mono text-4xl tracking-widest text-emerald-400">{room}</p>
+            <ShareRoomButton roomCode={room} className="mt-4 w-full" />
           </div>
 
-          <p className="mb-8 text-slate-400">
-            Give this code to your friend so they can join the game.
+          <p className="mb-8 text-sm text-slate-500">
+            Share the link or give your friend the code to join.
           </p>
 
           <button
