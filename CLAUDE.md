@@ -16,6 +16,8 @@
 - N/A (stateless page, no persistence) (004-quarto-rules-page)
 - TypeScript 5.x, React 19 + TanStack Router, Framer Motion, Tailwind CSS, Lucide React icons (005-portfolio-home)
 - N/A (static content) (005-portfolio-home)
+- TypeScript 5.x, React 19, Node.js 20+ + TanStack Router, TanStack Start, Zod (validation), Lucide React (icons) (007-room-share-link)
+- N/A (uses existing in-memory PartyKit room state) (007-room-share-link)
 
 ## Recent Changes
 - 001-portfolio-site: Added TypeScript 5.x, React 19, Node.js 20+

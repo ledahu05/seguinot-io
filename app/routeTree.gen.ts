@@ -14,6 +14,7 @@ import { Route as GamesQuartoIndexRouteImport } from './routes/games/quarto/inde
 import { Route as GamesQuartoRulesRouteImport } from './routes/games/quarto/rules'
 import { Route as GamesQuartoPlayRouteImport } from './routes/games/quarto/play'
 import { Route as GamesQuartoOnlineRouteImport } from './routes/games/quarto/online'
+import { Route as GamesQuartoJoinRouteImport } from './routes/games/quarto/join'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,9 +41,15 @@ const GamesQuartoOnlineRoute = GamesQuartoOnlineRouteImport.update({
   path: '/games/quarto/online',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GamesQuartoJoinRoute = GamesQuartoJoinRouteImport.update({
+  id: '/games/quarto/join',
+  path: '/games/quarto/join',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/games/quarto/join': typeof GamesQuartoJoinRoute
   '/games/quarto/online': typeof GamesQuartoOnlineRoute
   '/games/quarto/play': typeof GamesQuartoPlayRoute
   '/games/quarto/rules': typeof GamesQuartoRulesRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/games/quarto/join': typeof GamesQuartoJoinRoute
   '/games/quarto/online': typeof GamesQuartoOnlineRoute
   '/games/quarto/play': typeof GamesQuartoPlayRoute
   '/games/quarto/rules': typeof GamesQuartoRulesRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/games/quarto/join': typeof GamesQuartoJoinRoute
   '/games/quarto/online': typeof GamesQuartoOnlineRoute
   '/games/quarto/play': typeof GamesQuartoPlayRoute
   '/games/quarto/rules': typeof GamesQuartoRulesRoute
@@ -67,6 +76,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/games/quarto/join'
     | '/games/quarto/online'
     | '/games/quarto/play'
     | '/games/quarto/rules'
@@ -74,6 +84,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/games/quarto/join'
     | '/games/quarto/online'
     | '/games/quarto/play'
     | '/games/quarto/rules'
@@ -81,6 +92,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/games/quarto/join'
     | '/games/quarto/online'
     | '/games/quarto/play'
     | '/games/quarto/rules'
@@ -89,6 +101,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  GamesQuartoJoinRoute: typeof GamesQuartoJoinRoute
   GamesQuartoOnlineRoute: typeof GamesQuartoOnlineRoute
   GamesQuartoPlayRoute: typeof GamesQuartoPlayRoute
   GamesQuartoRulesRoute: typeof GamesQuartoRulesRoute
@@ -132,11 +145,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GamesQuartoOnlineRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/games/quarto/join': {
+      id: '/games/quarto/join'
+      path: '/games/quarto/join'
+      fullPath: '/games/quarto/join'
+      preLoaderRoute: typeof GamesQuartoJoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  GamesQuartoJoinRoute: GamesQuartoJoinRoute,
   GamesQuartoOnlineRoute: GamesQuartoOnlineRoute,
   GamesQuartoPlayRoute: GamesQuartoPlayRoute,
   GamesQuartoRulesRoute: GamesQuartoRulesRoute,
