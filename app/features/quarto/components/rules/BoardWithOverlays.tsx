@@ -8,7 +8,7 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff } from 'lucide-react';
-import { WINNING_LINES_CONFIG } from './data/winningLines';
+import { WINNING_LINES_CONFIG, WINNING_SQUARES_CONFIG } from './data/winningLines';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 import type { WinningLineCategory } from './data/types';
 
@@ -19,6 +19,7 @@ const CATEGORY_COLORS: Record<WinningLineCategory, string> = {
   row: '#3b82f6', // blue
   column: '#22c55e', // green
   diagonal: '#f59e0b', // amber
+  square: '#ec4899', // pink
 };
 
 /**
@@ -137,6 +138,58 @@ function WinningLinesOverlay({
 }
 
 /**
+ * SVG Overlay for 2x2 squares (advanced rules)
+ */
+function SquaresOverlay({
+  showSquares,
+  prefersReducedMotion,
+}: {
+  showSquares: boolean;
+  prefersReducedMotion: boolean;
+}) {
+  if (!showSquares) return null;
+
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      className="pointer-events-none absolute inset-0 h-full w-full"
+      style={{ padding: '8%' }}
+    >
+      <AnimatePresence>
+        {WINNING_SQUARES_CONFIG.map((square, index) => (
+          <motion.path
+            key={square.id}
+            d={square.svgPath}
+            stroke={CATEGORY_COLORS.square}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill={CATEGORY_COLORS.square}
+            fillOpacity={0.1}
+            initial={prefersReducedMotion ? { opacity: 1 } : { scale: 0.8, opacity: 0 }}
+            animate={
+              prefersReducedMotion
+                ? { opacity: 1 }
+                : { scale: 1, opacity: 1 }
+            }
+            exit={{ opacity: 0 }}
+            transition={
+              prefersReducedMotion
+                ? { duration: 0 }
+                : {
+                    delay: index * 0.08,
+                    duration: 0.3,
+                    ease: 'easeOut',
+                  }
+            }
+          />
+        ))}
+      </AnimatePresence>
+    </svg>
+  );
+}
+
+/**
  * Legend for winning line categories
  */
 function LineLegend() {
@@ -153,6 +206,20 @@ function LineLegend() {
       <div className="flex items-center gap-2">
         <div className="h-1 w-6 rounded-full bg-amber-500" />
         <span className="text-slate-400">Diagonals (2)</span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Legend for squares
+ */
+function SquaresLegend() {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
+      <div className="flex items-center gap-2">
+        <div className="h-4 w-4 rounded border-2 border-pink-500 bg-pink-500/20" />
+        <span className="text-slate-400">2×2 Squares (9)</span>
       </div>
     </div>
   );
@@ -216,6 +283,69 @@ export function BoardWithOverlays() {
         {showLines
           ? '10 possible winning lines total'
           : 'Press the button to see all 10 winning lines'}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * BoardWithSquares component - Shows 2x2 square patterns for advanced rules
+ */
+export function BoardWithSquares() {
+  const [showSquares, setShowSquares] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+
+  return (
+    <div className="space-y-4">
+      {/* Toggle button */}
+      <div className="flex justify-center">
+        <button
+          onClick={() => setShowSquares(!showSquares)}
+          className={`flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-all focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+            showSquares
+              ? 'bg-pink-500 text-white'
+              : 'bg-slate-700 text-white hover:bg-slate-600'
+          }`}
+          aria-pressed={showSquares}
+          aria-label={showSquares ? 'Hide 2x2 squares overlay' : 'Show 2x2 squares overlay'}
+        >
+          {showSquares ? (
+            <>
+              <EyeOff className="h-4 w-4" />
+              <span>Hide Squares</span>
+            </>
+          ) : (
+            <>
+              <Eye className="h-4 w-4" />
+              <span>Show 2×2 Squares</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Board with overlay */}
+      <div className="relative aspect-square overflow-hidden rounded-lg bg-slate-800/50">
+        <Suspense fallback={<BoardSkeleton />}>
+          <Canvas>
+            <BoardScene />
+          </Canvas>
+        </Suspense>
+
+        {/* SVG overlay for squares */}
+        <SquaresOverlay
+          showSquares={showSquares}
+          prefersReducedMotion={prefersReducedMotion}
+        />
+      </div>
+
+      {/* Legend */}
+      {showSquares && <SquaresLegend />}
+
+      {/* Count info */}
+      <p className="text-center text-sm text-slate-400">
+        {showSquares
+          ? '9 possible 2×2 squares (advanced rules)'
+          : 'Press the button to see all 9 square patterns'}
       </p>
     </div>
   );

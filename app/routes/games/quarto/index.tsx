@@ -41,12 +41,12 @@ function QuartoMenuPage() {
   const [roomCode, setRoomCode] = useState('');
 
   const handleStartLocalGame = () => {
-    startLocalGame(player1Name || 'Player 1', player2Name || 'Player 2');
+    startLocalGame(player1Name || 'Player 1', player2Name || 'Player 2', true);
     navigate({ to: '/games/quarto/play' });
   };
 
   const handleStartAIGame = () => {
-    startAIGame(playerName || 'Player', difficulty, playerGoesFirst);
+    startAIGame(playerName || 'Player', difficulty, playerGoesFirst, true);
     navigate({ to: '/games/quarto/play' });
   };
 

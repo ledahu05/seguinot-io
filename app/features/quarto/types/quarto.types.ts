@@ -60,6 +60,7 @@ export interface Game {
   history: GameMove[];
   createdAt: number;
   updatedAt: number;
+  advancedRules?: boolean;  // Enable 2x2 square winning condition
 }
 
 // Room for online multiplayer
@@ -146,6 +147,7 @@ export const GameSchema = z.object({
   history: z.array(GameMoveSchema),
   createdAt: z.number(),
   updatedAt: z.number(),
+  advancedRules: z.boolean().optional(),
 });
 
 export const RoomSchema = z.object({
@@ -165,6 +167,16 @@ export const WINNING_LINES: number[][] = [
   [0, 4, 8, 12], [1, 5, 9, 13], [2, 6, 10, 14], [3, 7, 11, 15],
   // Diagonals
   [0, 5, 10, 15], [3, 6, 9, 12]
+];
+
+// Advanced Variation: 2x2 Square winning patterns (9 possible squares)
+export const WINNING_SQUARES: number[][] = [
+  // Row 0-1
+  [0, 1, 4, 5], [1, 2, 5, 6], [2, 3, 6, 7],
+  // Row 1-2
+  [4, 5, 8, 9], [5, 6, 9, 10], [6, 7, 10, 11],
+  // Row 2-3
+  [8, 9, 12, 13], [9, 10, 13, 14], [10, 11, 14, 15]
 ];
 
 export const AI_DEPTHS: Record<AIDifficulty, number> = {

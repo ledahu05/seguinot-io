@@ -48,9 +48,9 @@ const quartoSlice = createSlice({
     // Game Lifecycle
     startLocalGame(
       state,
-      action: PayloadAction<{ player1Name: string; player2Name: string }>
+      action: PayloadAction<{ player1Name: string; player2Name: string; advancedRules?: boolean }>
     ) {
-      const { player1Name, player2Name } = action.payload;
+      const { player1Name, player2Name, advancedRules = false } = action.payload;
       const startingPlayer = Math.random() < 0.5 ? 0 : 1;
       const now = Date.now();
 
@@ -72,6 +72,7 @@ const quartoSlice = createSlice({
         history: [],
         createdAt: now,
         updatedAt: now,
+        advancedRules,
       };
       state.ui.error = null;
     },
@@ -82,9 +83,10 @@ const quartoSlice = createSlice({
         playerName: string;
         difficulty: AIDifficulty;
         playerGoesFirst: boolean;
+        advancedRules?: boolean;
       }>
     ) {
-      const { playerName, difficulty, playerGoesFirst } = action.payload;
+      const { playerName, difficulty, playerGoesFirst, advancedRules = false } = action.payload;
       const now = Date.now();
 
       state.game = {
@@ -105,6 +107,7 @@ const quartoSlice = createSlice({
         history: [],
         createdAt: now,
         updatedAt: now,
+        advancedRules,
       };
       state.ui.error = null;
     },
@@ -170,8 +173,8 @@ const quartoSlice = createSlice({
       state.game.history.push(move);
       state.game.updatedAt = Date.now();
 
-      // Auto-detect Quarto win
-      const winResult = findWinningLine(state.game.board);
+      // Auto-detect Quarto win (pass advancedRules for 2x2 square detection)
+      const winResult = findWinningLine(state.game.board, state.game.advancedRules);
       if (winResult) {
         state.game.status = 'finished';
         state.game.winner = state.game.currentTurn;
@@ -194,7 +197,7 @@ const quartoSlice = createSlice({
     callQuarto(state) {
       if (!state.game) return;
 
-      const winResult = findWinningLine(state.game.board);
+      const winResult = findWinningLine(state.game.board, state.game.advancedRules);
 
       const move: GameMove = {
         type: 'quarto',
@@ -273,8 +276,8 @@ const quartoSlice = createSlice({
         state.game.history.push(move);
         state.game.updatedAt = Date.now();
 
-        // Auto-detect Quarto win (for AI moves)
-        const winResult = findWinningLine(state.game.board);
+        // Auto-detect Quarto win (for AI moves, pass advancedRules for 2x2 square detection)
+        const winResult = findWinningLine(state.game.board, state.game.advancedRules);
         if (winResult) {
           state.game.status = 'finished';
           state.game.winner = state.game.currentTurn;

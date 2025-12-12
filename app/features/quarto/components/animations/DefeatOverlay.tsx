@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 export interface DefeatOverlayProps {
   isVisible: boolean;
@@ -19,7 +20,8 @@ interface FallingParticle {
   drift: number;
 }
 
-const PARTICLE_COUNT = 40;
+const PARTICLE_COUNT_DESKTOP = 40;
+const PARTICLE_COUNT_MOBILE = 18;
 const PARTICLE_COLORS = ['#64748b', '#475569', '#94a3b8', '#334155'];
 
 export function DefeatOverlay({
@@ -31,7 +33,10 @@ export function DefeatOverlay({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<FallingParticle[]>([]);
   const animationFrameRef = useRef<number | null>(null);
+  const frameCountRef = useRef(0);
   const prefersReducedMotion = useReducedMotion();
+  const isMobile = useIsMobile();
+  const particleCount = isMobile ? PARTICLE_COUNT_MOBILE : PARTICLE_COUNT_DESKTOP;
 
   useEffect(() => {
     if (!isVisible || prefersReducedMotion || !canvasRef.current) return;
@@ -48,8 +53,9 @@ export function DefeatOverlay({
     updateSize();
     window.addEventListener('resize', updateSize);
 
-    // Initialize particles
-    particlesRef.current = Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
+    // Initialize particles (fewer on mobile for better performance)
+    frameCountRef.current = 0;
+    particlesRef.current = Array.from({ length: particleCount }, (_, i) => ({
       id: i,
       x: Math.random() * canvas.width,
       y: -20 - Math.random() * canvas.height, // Start above viewport
@@ -62,6 +68,14 @@ export function DefeatOverlay({
     const startTime = performance.now();
 
     const animate = (currentTime: number) => {
+      frameCountRef.current++;
+
+      // Skip every other frame on mobile for ~30fps (reduces CPU load)
+      if (isMobile && frameCountRef.current % 2 !== 0) {
+        animationFrameRef.current = requestAnimationFrame(animate);
+        return;
+      }
+
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
 
@@ -105,7 +119,7 @@ export function DefeatOverlay({
       }
       window.removeEventListener('resize', updateSize);
     };
-  }, [isVisible, duration, onComplete, prefersReducedMotion]);
+  }, [isVisible, duration, onComplete, prefersReducedMotion, isMobile, particleCount]);
 
   // Auto-complete for reduced motion
   useEffect(() => {

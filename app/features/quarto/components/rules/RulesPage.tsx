@@ -9,7 +9,7 @@ import { EXAMPLE_BOARDS } from './data/exampleBoards';
 import { PieceGrid } from './PieceGrid';
 import { TurnAnimation } from './TurnAnimation';
 import { ExampleBoard } from './ExampleBoard';
-import { BoardWithOverlays } from './BoardWithOverlays';
+import { BoardWithOverlays, BoardWithSquares } from './BoardWithOverlays';
 import { KeyboardShortcutsHelp } from '../KeyboardShortcutsHelp';
 
 /**
@@ -136,6 +136,12 @@ function InteractiveContent({ sectionId }: { sectionId: string }) {
       return (
         <div className="mt-6">
           <BoardWithOverlays />
+        </div>
+      );
+    case 'advanced':
+      return (
+        <div className="mt-6">
+          <BoardWithSquares />
         </div>
       );
     default:

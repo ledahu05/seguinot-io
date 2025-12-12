@@ -42,9 +42,9 @@ export interface TurnAnimationStep {
 }
 
 /**
- * Category of winning line
+ * Category of winning line (including 2x2 squares for advanced rules)
  */
-export type WinningLineCategory = 'row' | 'column' | 'diagonal';
+export type WinningLineCategory = 'row' | 'column' | 'diagonal' | 'square';
 
 /**
  * Configuration for winning line overlay visualization

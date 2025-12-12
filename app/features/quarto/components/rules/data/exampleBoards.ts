@@ -76,3 +76,23 @@ export const EXAMPLE_BOARDS: ExampleBoardConfig[] = [
     highlightLine: [0, 4, 8, 12], // column 0
   },
 ];
+
+/**
+ * Example board configurations for 2x2 square wins (advanced rules)
+ */
+export const EXAMPLE_SQUARE_BOARDS: ExampleBoardConfig[] = [
+  {
+    id: 'square-win-height',
+    title: '2×2 Square Win',
+    caption: 'All 4 pieces in this square are TALL (advanced rules)',
+    isWin: true,
+    sharedAttribute: 'height',
+    positions: [
+      8, 9, null, null,   // tall pieces (bit 3 = 1)
+      10, 11, null, null, // tall pieces
+      null, null, null, null,
+      null, null, null, null,
+    ],
+    highlightLine: [0, 1, 4, 5], // top-left 2x2 square
+  },
+];
