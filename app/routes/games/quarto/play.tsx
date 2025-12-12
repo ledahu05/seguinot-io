@@ -9,7 +9,6 @@ import {
     Piece3D,
     GameStatus,
     GameControls,
-    CameraDebugOverlay,
     KeyboardShortcutsHelp,
     Canvas3DLoader,
     WinCelebration
@@ -249,8 +248,6 @@ function QuartoPlayPage() {
                                 target={cameraConfig.board.target}
                             />
 
-                            {/* Debug Overlay */}
-                            <CameraDebugOverlay controlsRef={orbitControlsRef} />
                         </Suspense>
                     </Canvas>
                     </Suspense>
