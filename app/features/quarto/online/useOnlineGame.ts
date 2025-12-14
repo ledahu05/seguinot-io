@@ -102,6 +102,10 @@ export function useOnlineGame({
           break;
 
         case 'STATE_UPDATE':
+          console.log('[useOnlineGame] STATE_UPDATE - game status:', message.game.status);
+          console.log('[useOnlineGame] STATE_UPDATE - board:', JSON.stringify(message.game.board.positions));
+          console.log('[useOnlineGame] STATE_UPDATE - winner:', message.game.winner);
+          console.log('[useOnlineGame] STATE_UPDATE - winningLine:', message.game.winningLine);
           dispatch(setOnlineGame(message.game));
           break;
 
