@@ -18,6 +18,8 @@
 - N/A (static content) (005-portfolio-home)
 - TypeScript 5.x, React 19, Node.js 20+ + TanStack Router, TanStack Start, Zod (validation), Lucide React (icons) (007-room-share-link)
 - N/A (uses existing in-memory PartyKit room state) (007-room-share-link)
+- TypeScript 5.7, React 19, Node.js 20+ + TanStack Start/Router, Tailwind CSS v4, Framer Motion, Zod, unified/remark/rehype (markdown processing), shiki (syntax highlighting) (008-portfolio-blog)
+- Static markdown files in `/data/blog/` directory (build-time processing) (008-portfolio-blog)
 
 ## Recent Changes
 - 001-portfolio-site: Added TypeScript 5.x, React 19, Node.js 20+

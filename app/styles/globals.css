@@ -126,3 +126,117 @@
 .image-loading {
   @apply animate-pulse bg-muted;
 }
+
+/* T027: Shiki syntax highlighting dual theme support */
+.shiki {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+}
+
+.shiki span {
+  color: var(--shiki-light);
+  background-color: transparent !important;
+}
+
+.dark .shiki {
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
+}
+
+.dark .shiki span {
+  color: var(--shiki-dark);
+  background-color: transparent !important;
+}
+
+/* Code block styling - let Shiki handle backgrounds */
+.prose pre {
+  @apply overflow-x-auto rounded-lg border border-border p-4;
+  background-color: transparent !important;
+}
+
+.prose pre code {
+  @apply p-0 text-sm;
+  background-color: transparent !important;
+}
+
+/* Inline code styling */
+.prose :not(pre) > code {
+  @apply rounded bg-muted px-1.5 py-0.5 text-sm font-normal;
+}
+
+.prose :not(pre) > code::before,
+.prose :not(pre) > code::after {
+  content: none;
+}
+
+/* Blog prose enhancements - Typography hierarchy and spacing */
+.prose h1 {
+  @apply text-4xl font-bold mt-12 mb-6 text-foreground;
+}
+
+.prose h2 {
+  @apply text-3xl font-semibold mt-10 mb-4 pb-2 border-b border-border text-foreground;
+}
+
+.prose h3 {
+  @apply text-2xl font-semibold mt-8 mb-3 text-foreground;
+}
+
+.prose h4 {
+  @apply text-xl font-medium mt-6 mb-2 text-foreground;
+}
+
+.prose h5 {
+  @apply text-lg font-medium mt-4 mb-2 text-muted-foreground uppercase tracking-wide;
+}
+
+.prose h6 {
+  @apply text-base font-medium mt-4 mb-2 text-muted-foreground uppercase tracking-wide;
+}
+
+.prose hr {
+  @apply my-8 border-t-2 border-border;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-primary pl-4 py-2 my-6 bg-muted/30 rounded-r-lg italic;
+}
+
+.prose ul,
+.prose ol {
+  @apply my-4 pl-6;
+}
+
+.prose li {
+  @apply my-2;
+}
+
+.prose table {
+  @apply w-full my-6 border-collapse;
+}
+
+.prose th {
+  @apply bg-muted px-4 py-2 text-left font-semibold border border-border;
+}
+
+.prose td {
+  @apply px-4 py-2 border border-border;
+}
+
+.prose p {
+  @apply my-4 leading-relaxed;
+}
+
+/* Links - make them visible */
+.prose a {
+  @apply text-primary underline underline-offset-2 hover:text-primary/80;
+}
+
+/* Lists - restore markers */
+.prose ul {
+  @apply list-disc;
+}
+
+.prose ol {
+  @apply list-decimal;
+}

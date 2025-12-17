@@ -1,6 +1,8 @@
-// T032 & T033: CTAButtons component with smooth scroll functionality
+// T032 & T033 & T037: CTAButtons component with smooth scroll and blog navigation
 
+import { Link } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
+import { BookOpen } from 'lucide-react'
 
 interface CTAButtonsProps {
   projectsId?: string
@@ -34,6 +36,12 @@ export function CTAButtons({
         className="min-w-[160px]"
       >
         Contact
+      </Button>
+      <Button variant="outline" size="lg" className="min-w-[160px]" asChild>
+        <Link to="/blog" className="inline-flex items-center gap-2">
+          <BookOpen className="h-4 w-4" />
+          Blog
+        </Link>
       </Button>
     </div>
   )
