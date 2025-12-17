@@ -1,7 +1,14 @@
+// T017-T018: Quarto hub SEO with meta tags and SoftwareApplication JSON-LD
+
 import { useState } from 'react';
 import { createFileRoute, useNavigate, Link } from '@tanstack/react-router';
 import { useQuartoGame } from '@/features/quarto/hooks';
 import type { AIDifficulty } from '@/features/quarto/types/quarto.types';
+import {
+  generatePageMeta,
+  generateGameSchema,
+  generateJsonLdScript,
+} from '@/lib/seo';
 
 // Generate a random 6-character room code
 function generateRoomCode(): string {
@@ -14,6 +21,22 @@ function generateRoomCode(): string {
 }
 
 export const Route = createFileRoute('/games/quarto/')({
+  head: () => {
+    const pageMeta = generatePageMeta({
+      title: 'Quarto Game',
+      description:
+        'Play Quarto, the strategic board game of shared attributes. Choose from local multiplayer, AI opponent, or online play with friends.',
+      path: '/games/quarto',
+      type: 'website',
+    });
+
+    const gameSchema = generateGameSchema();
+
+    return {
+      ...pageMeta,
+      scripts: [generateJsonLdScript(gameSchema)],
+    };
+  },
   component: QuartoMenuPage,
 });
 

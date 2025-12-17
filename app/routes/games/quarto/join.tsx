@@ -1,6 +1,9 @@
+// T022: Quarto join page SEO with noIndex meta tag
+
 import { useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { z } from 'zod';
+import { generateNoIndexMeta } from '@/lib/seo';
 
 // T007: Zod validation for room code in URL
 const searchSchema = z.object({
@@ -12,6 +15,11 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute('/games/quarto/join')({
   validateSearch: searchSchema,
+  head: () => generateNoIndexMeta({
+    title: 'Join Quarto Game',
+    description: 'Join an online Quarto game with a room code.',
+    path: '/games/quarto/join',
+  }),
   component: JoinRoomPage,
   // T011: Handle invalid room code format - redirect to menu on validation error
   onError: () => {

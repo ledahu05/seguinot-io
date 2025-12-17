@@ -1,8 +1,15 @@
 // T025 & T026 & T030: Article detail route with slug parameter and SEO
+// T015-T016: Enhanced article SEO with og:url, og:image, canonical, and Article JSON-LD
 
 import { createFileRoute, Link, notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { ArrowLeft } from 'lucide-react'
+import {
+  generatePageMeta,
+  generateArticleSchema,
+  generateJsonLdScript,
+  SITE_CONFIG,
+} from '@/lib/seo'
 
 // Server function to fetch blog post by slug
 const fetchBlogPostBySlug = createServerFn().handler(async () => {
@@ -25,41 +32,33 @@ export const Route = createFileRoute('/blog/$slug')({
         meta: [{ title: 'Article Not Found | Blog' }],
       }
     }
+
+    const pageMeta = generatePageMeta({
+      title: loaderData.title,
+      description: loaderData.summary,
+      path: `/blog/${loaderData.slug}`,
+      type: 'article',
+      article: {
+        publishedTime: loaderData.date,
+        author: loaderData.author || SITE_CONFIG.author.name,
+        tags: loaderData.tags,
+        readingTime: loaderData.readingTime,
+      },
+    })
+
+    // Generate Article JSON-LD
+    const articleSchema = generateArticleSchema({
+      title: loaderData.title,
+      description: loaderData.summary,
+      slug: loaderData.slug,
+      date: loaderData.date,
+      author: loaderData.author,
+      tags: loaderData.tags,
+    })
+
     return {
-      meta: [
-        {
-          title: `${loaderData.title} | Christophe Seguinot`,
-        },
-        {
-          name: 'description',
-          content: loaderData.summary,
-        },
-        {
-          property: 'og:title',
-          content: loaderData.title,
-        },
-        {
-          property: 'og:description',
-          content: loaderData.summary,
-        },
-        {
-          property: 'og:type',
-          content: 'article',
-        },
-        {
-          property: 'article:published_time',
-          content: loaderData.date,
-        },
-        ...(loaderData.author
-          ? [{ property: 'article:author', content: loaderData.author }]
-          : []),
-        ...(loaderData.tags.length > 0
-          ? loaderData.tags.map((tag: string) => ({
-              property: 'article:tag',
-              content: tag,
-            }))
-          : []),
-      ],
+      ...pageMeta,
+      scripts: [generateJsonLdScript(articleSchema)],
     }
   },
   notFoundComponent: () => (

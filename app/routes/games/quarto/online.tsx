@@ -1,3 +1,5 @@
+// T021: Quarto online page SEO with noIndex meta tag
+
 import { useEffect, useCallback, useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { z } from 'zod';
@@ -23,6 +25,7 @@ import {
 } from '@/features/quarto/store/selectors';
 import { resetGame, clearOnlineRoom, setConnectionStatus } from '@/features/quarto/store/quartoSlice';
 import { createEmptyBoard } from '@/features/quarto/utils/winDetection';
+import { generateNoIndexMeta } from '@/lib/seo';
 
 const searchSchema = z.object({
   room: z.string().length(6),
@@ -32,6 +35,11 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute('/games/quarto/online')({
   validateSearch: searchSchema,
+  head: () => generateNoIndexMeta({
+    title: 'Online Quarto',
+    description: 'Play Quarto online with friends. Share a room code and compete in real-time.',
+    path: '/games/quarto/online',
+  }),
   component: OnlineGamePage,
 });
 

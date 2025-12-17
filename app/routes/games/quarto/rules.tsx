@@ -1,10 +1,12 @@
 /**
  * Rules page route for Quarto game
  * @module routes/games/quarto/rules
+ * T019: Quarto rules page SEO with meta tags
  */
 
 import { Suspense, lazy } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
+import { generatePageMeta } from '@/lib/seo';
 
 // Lazy load RulesPage for code splitting
 const RulesPage = lazy(() =>
@@ -53,6 +55,15 @@ function RulesPageSkeleton() {
 }
 
 export const Route = createFileRoute('/games/quarto/rules')({
+  head: () => {
+    return generatePageMeta({
+      title: 'Quarto Rules',
+      description:
+        'Learn how to play Quarto in 2 minutes. Understand the rules, piece attributes, and winning strategies.',
+      path: '/games/quarto/rules',
+      type: 'website',
+    });
+  },
   component: function RulesPageRoute() {
     return (
       <Suspense fallback={<RulesPageSkeleton />}>
