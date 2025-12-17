@@ -1,4 +1,5 @@
 // T018 & T019 & T044 & T047: Blog listing route with loader, SEO, and tag filtering
+// T013-T014: Enhanced blog listing SEO with og:url, canonical, and CollectionPage JSON-LD
 
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { z } from 'zod'
@@ -6,6 +7,11 @@ import { ArrowLeft } from 'lucide-react'
 import { serverGetBlogIndex } from '@/lib/server/blog.server'
 import { BlogList } from '@/components/blog/BlogList'
 import { TagFilter } from '@/components/blog/TagFilter'
+import {
+  generatePageMeta,
+  generateCollectionPageSchema,
+  generateJsonLdScript,
+} from '@/lib/seo'
 
 const blogSearchSchema = z.object({
   tag: z.string().optional(),
@@ -30,26 +36,33 @@ export const Route = createFileRoute('/blog/')({
     }
   },
   head: ({ loaderData }) => {
-    const title = loaderData?.activeTag
-      ? `Articles tagged "${loaderData.activeTag}" | Blog`
-      : 'Blog | Christophe Seguinot'
+    const activeTag = loaderData?.activeTag
+    const posts = loaderData?.posts || []
+
+    const title = activeTag
+      ? `Articles tagged "${activeTag}"`
+      : 'Blog'
+    const description =
+      'Articles about frontend development, React, TypeScript, and building modern web applications.'
+
+    const pageMeta = generatePageMeta({
+      title,
+      description,
+      path: activeTag ? `/blog?tag=${activeTag}` : '/blog',
+      type: 'website',
+    })
+
+    // Generate CollectionPage JSON-LD
+    const collectionSchema = generateCollectionPageSchema(
+      posts.map((p: { slug: string; title: string }) => ({
+        slug: p.slug,
+        title: p.title,
+      }))
+    )
 
     return {
-      meta: [
-        { title },
-        {
-          name: 'description',
-          content:
-            'Articles about frontend development, React, TypeScript, and building modern web applications.',
-        },
-        { property: 'og:title', content: title },
-        {
-          property: 'og:description',
-          content:
-            'Articles about frontend development, React, TypeScript, and building modern web applications.',
-        },
-        { property: 'og:type', content: 'website' },
-      ],
+      ...pageMeta,
+      scripts: [generateJsonLdScript(collectionSchema)],
     }
   },
   component: BlogPage,

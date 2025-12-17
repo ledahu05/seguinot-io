@@ -1,0 +1,69 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background Gradient: Dark Slate -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" /> <!-- slate-900 -->
+      <stop offset="100%" stop-color="#1e293b" /> <!-- slate-800 -->
+    </linearGradient>
+
+    <!-- Accent Gradient for graphical elements -->
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3b82f6" /> <!-- blue-500 -->
+      <stop offset="100%" stop-color="#06b6d4" /> <!-- cyan-500 -->
+    </linearGradient>
+
+    <!-- Grid Pattern for "Engineering" feel -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="1" fill="#ffffff" fill-opacity="0.05" />
+    </pattern>
+
+    <!-- Font Family -->
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;display=swap');
+      .text-name { font-family: 'Inter', sans-serif; font-weight: 700; fill: #ffffff; }
+      .text-title { font-family: 'Inter', sans-serif; font-weight: 400; fill: #38bdf8; letter-spacing: 0.05em; }
+      .code-element { font-family: 'Inter', sans-serif; font-weight: 700; opacity: 0.05; fill: #ffffff; }
+    </style>
+  </defs>
+
+  <!-- Background Layer -->
+  <rect width="1200" height="630" fill="url(#bgGradient)" />
+
+  <!-- Subtle Grid Overlay -->
+  <rect width="1200" height="630" fill="url(#grid)" />
+
+  <!-- Abstract Tech Visuals (Swiss Style Geometric Shapes) -->
+  <!-- Large Abstract Circle/Arc for depth -->
+  <circle cx="1100" cy="315" r="400" stroke="url(#accentGradient)" stroke-width="2" fill="none" opacity="0.1" />
+  <circle cx="1100" cy="315" r="300" stroke="#ffffff" stroke-width="1" fill="none" opacity="0.05" />
+
+  <!-- Abstract Code Brackets (Decorative Background) -->
+  <text x="1050" y="550" font-size="600" text-anchor="end" class="code-element">}</text>
+
+  <!-- Content Container (Left Aligned - Swiss Grid) -->
+  <!-- Vertical Center is 315. We offset slightly to account for visual weight. -->
+  <g transform="translate(120, 315)">
+
+    <!-- Decorative Line -->
+    <rect x="0" y="-90" width="60" height="4" fill="#3b82f6" />
+
+    <!-- Name -->
+    <text x="0" y="10" font-size="82" class="text-name" letter-spacing="-0.02em">
+      Christophe Seguinot
+    </text>
+
+    <!-- Title Group -->
+    <g transform="translate(4, 70)">
+      <text x="0" y="0" font-size="36" class="text-title">
+        SENIOR FRONTEND DEVELOPER
+      </text>
+
+      <!-- Blinking Cursor Effect -->
+      <rect x="560" y="-30" width="3" height="36" fill="#06b6d4">
+        <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite" />
+      </rect>
+    </g>
+
+  </g>
+
+</svg>

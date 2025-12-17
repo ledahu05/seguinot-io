@@ -1,3 +1,5 @@
+// T020: Quarto play page SEO with noIndex meta tag
+
 import { Suspense, useRef } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Canvas } from '@react-three/fiber';
@@ -21,8 +23,14 @@ import {
     useWinAnimation
 } from '@/features/quarto/hooks';
 import { createEmptyBoard } from '@/features/quarto/utils';
+import { generateNoIndexMeta } from '@/lib/seo';
 
 export const Route = createFileRoute('/games/quarto/play')({
+    head: () => generateNoIndexMeta({
+        title: 'Play Quarto',
+        description: 'Currently playing Quarto. Align four pieces with a shared attribute to win!',
+        path: '/games/quarto/play',
+    }),
     component: QuartoPlayPage
 });
 

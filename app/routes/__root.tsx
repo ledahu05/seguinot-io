@@ -3,8 +3,11 @@ import { Provider as ReduxProvider } from 'react-redux'
 import { ThemeProvider } from '@/components/shared/ThemeProvider'
 import { ThemeToggle } from '@/components/shared/ThemeToggle'
 import { store } from '../store'
+import { SITE_CONFIG } from '@/lib/seo'
 
 import globalsCss from '../styles/globals.css?url'
+
+const defaultOgImage = `${SITE_CONFIG.url}${SITE_CONFIG.images.default}`
 
 export const Route = createRootRoute({
   head: () => ({
@@ -17,12 +20,37 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'Christophe Seguinot | Senior Frontend Developer',
+        title: SITE_CONFIG.title,
       },
       {
         name: 'description',
-        content:
-          'Senior Frontend Developer with 12+ years of experience building enterprise-scale React/TypeScript applications.',
+        content: SITE_CONFIG.description,
+      },
+      // Default Open Graph tags (can be overridden by child routes)
+      {
+        property: 'og:site_name',
+        content: SITE_CONFIG.name,
+      },
+      {
+        property: 'og:locale',
+        content: SITE_CONFIG.locale,
+      },
+      {
+        property: 'og:type',
+        content: 'website',
+      },
+      {
+        property: 'og:image',
+        content: defaultOgImage,
+      },
+      // Default Twitter Card tags
+      {
+        name: 'twitter:card',
+        content: 'summary_large_image',
+      },
+      {
+        name: 'twitter:image',
+        content: defaultOgImage,
       },
     ],
     links: [

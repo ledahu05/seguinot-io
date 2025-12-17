@@ -1,10 +1,10 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 1.1.1 → 1.2.0
-Modified Principles:
-  - II. Tech Stack: Added PartyKit for real-time multiplayer WebSocket infrastructure
-Added Sections: None
+Version Change: 1.2.0 → 1.3.0
+Modified Principles: None
+Added Sections:
+  - XI. SEO Optimization (new mandatory principle)
 Removed Sections: None
 Templates Requiring Updates:
   - .specify/templates/plan-template.md: ✅ No updates needed (generic constitution check reference)
@@ -143,6 +143,37 @@ Mobile-first approach is mandatory. All layouts MUST be designed for mobile scre
 - Content MUST remain readable without horizontal scrolling on any device
 - Navigation MUST be accessible and usable on touch devices
 
+### XI. SEO Optimization (MANDATORY)
+
+Search engine optimization is mandatory for all public-facing pages. Every feature MUST be implemented with SEO best practices.
+
+**Meta Tags & Structure:**
+- Every page MUST have a unique, descriptive `<title>` tag (50-60 characters)
+- Every page MUST have a unique `<meta name="description">` tag (150-160 characters)
+- Heading hierarchy MUST be semantic (single h1 per page, logical h2-h6 nesting)
+- URLs MUST be clean, readable, and include relevant keywords (no query strings for content pages)
+
+**Open Graph & Social:**
+- All public pages MUST include Open Graph meta tags (og:title, og:description, og:type, og:url)
+- Article pages MUST include article-specific OG tags (article:published_time, article:author, article:tag)
+- og:image MUST be provided for social sharing previews where applicable
+
+**Technical SEO:**
+- TanStack Start's `head()` function MUST be used for dynamic meta tags
+- Server-side rendering (SSR) MUST be used for content pages to ensure crawlability
+- Canonical URLs MUST be specified to prevent duplicate content issues
+- Structured data (JSON-LD) SHOULD be implemented for rich search results (articles, person, organization)
+
+**Content SEO:**
+- Images MUST have descriptive alt text for accessibility and SEO
+- Internal linking MUST be used to establish content relationships
+- Page load speed MUST meet Core Web Vitals (cross-reference Principle V)
+- Content MUST be crawlable (no critical content behind JavaScript-only rendering)
+
+**Validation:**
+- SEO implementation MUST be verified using Lighthouse SEO audit (score 90+)
+- New pages MUST pass SEO checklist review before deployment
+
 ## Governance
 
 This constitution supersedes all other development practices for this project. All implementation decisions MUST align with these principles.
@@ -164,4 +195,4 @@ This constitution supersedes all other development practices for this project. A
 - Violations MUST be justified in the Complexity Tracking section of the implementation plan
 - Constitution checks are required gates in the planning phase
 
-**Version**: 1.2.0 | **Ratified**: 2025-12-03 | **Last Amended**: 2025-12-07
+**Version**: 1.3.0 | **Ratified**: 2025-12-03 | **Last Amended**: 2025-12-17
