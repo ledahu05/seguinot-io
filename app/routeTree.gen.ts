@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BlogIndexRouteImport } from './routes/blog/index'
+import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 import { Route as GamesQuartoIndexRouteImport } from './routes/games/quarto/index'
 import { Route as GamesQuartoRulesRouteImport } from './routes/games/quarto/rules'
 import { Route as GamesQuartoPlayRouteImport } from './routes/games/quarto/play'
@@ -19,6 +21,16 @@ import { Route as GamesQuartoJoinRouteImport } from './routes/games/quarto/join'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GamesQuartoIndexRoute = GamesQuartoIndexRouteImport.update({
@@ -49,6 +61,8 @@ const GamesQuartoJoinRoute = GamesQuartoJoinRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/blog': typeof BlogIndexRoute
   '/games/quarto/join': typeof GamesQuartoJoinRoute
   '/games/quarto/online': typeof GamesQuartoOnlineRoute
   '/games/quarto/play': typeof GamesQuartoPlayRoute
@@ -57,6 +71,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/blog': typeof BlogIndexRoute
   '/games/quarto/join': typeof GamesQuartoJoinRoute
   '/games/quarto/online': typeof GamesQuartoOnlineRoute
   '/games/quarto/play': typeof GamesQuartoPlayRoute
@@ -66,6 +82,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/blog/': typeof BlogIndexRoute
   '/games/quarto/join': typeof GamesQuartoJoinRoute
   '/games/quarto/online': typeof GamesQuartoOnlineRoute
   '/games/quarto/play': typeof GamesQuartoPlayRoute
@@ -76,6 +94,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/blog/$slug'
+    | '/blog'
     | '/games/quarto/join'
     | '/games/quarto/online'
     | '/games/quarto/play'
@@ -84,6 +104,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/blog/$slug'
+    | '/blog'
     | '/games/quarto/join'
     | '/games/quarto/online'
     | '/games/quarto/play'
@@ -92,6 +114,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/blog/$slug'
+    | '/blog/'
     | '/games/quarto/join'
     | '/games/quarto/online'
     | '/games/quarto/play'
@@ -101,6 +125,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BlogSlugRoute: typeof BlogSlugRoute
+  BlogIndexRoute: typeof BlogIndexRoute
   GamesQuartoJoinRoute: typeof GamesQuartoJoinRoute
   GamesQuartoOnlineRoute: typeof GamesQuartoOnlineRoute
   GamesQuartoPlayRoute: typeof GamesQuartoPlayRoute
@@ -115,6 +141,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/games/quarto/': {
@@ -157,6 +197,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BlogSlugRoute: BlogSlugRoute,
+  BlogIndexRoute: BlogIndexRoute,
   GamesQuartoJoinRoute: GamesQuartoJoinRoute,
   GamesQuartoOnlineRoute: GamesQuartoOnlineRoute,
   GamesQuartoPlayRoute: GamesQuartoPlayRoute,
