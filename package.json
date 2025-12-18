@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev --port 3000",
-    "build": "vite build && cp -r data/blog .vercel/output/functions/__server.func/",
+    "prebuild:blog": "npx tsx scripts/prebuild-blog.ts",
+    "build": "vite build && cp -r data/blog .vercel/output/functions/__server.func/ && cp -r data/blog-cache .vercel/output/functions/__server.func/",
     "serve": "vite preview",
     "start": "vite preview",
     "test": "vitest run",

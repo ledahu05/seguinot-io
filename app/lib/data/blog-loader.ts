@@ -18,6 +18,12 @@ import {
 } from '../schemas/blog.schema'
 import { calculateReadingTime } from '../utils/reading-time'
 
+interface BlogCache {
+  posts: BlogPost[]
+  tags: string[]
+  generatedAt: string
+}
+
 /**
  * Get the blog directory path.
  * Works in both local dev (process.cwd()) and Vercel deployment.
@@ -37,6 +43,47 @@ function getBlogDir(): string {
 
   // Return cwd path for error messaging
   return cwdPath
+}
+
+/**
+ * Get the blog cache file path.
+ * Works in both local dev and Vercel deployment.
+ */
+function getBlogCachePath(): string | null {
+  // Try process.cwd() first (works in local dev and build)
+  const cwdPath = path.join(process.cwd(), 'data/blog-cache/index.json')
+  if (fs.existsSync(cwdPath)) {
+    return cwdPath
+  }
+
+  // Vercel serverless: cache folder is copied to function root
+  const vercelPath = '/var/task/blog-cache/index.json'
+  if (fs.existsSync(vercelPath)) {
+    return vercelPath
+  }
+
+  return null
+}
+
+/**
+ * Try to load posts from pre-built cache.
+ * Returns null if cache doesn't exist (development mode).
+ */
+function loadFromCache(): BlogPost[] | null {
+  const cachePath = getBlogCachePath()
+  if (!cachePath) {
+    return null
+  }
+
+  try {
+    const cacheContent = fs.readFileSync(cachePath, 'utf-8')
+    const cache: BlogCache = JSON.parse(cacheContent)
+    console.log(`Loaded ${cache.posts.length} posts from cache (built: ${cache.generatedAt})`)
+    return cache.posts
+  } catch (error) {
+    console.warn('Failed to load blog cache:', error)
+    return null
+  }
 }
 
 let cachedPosts: BlogPost[] | null = null
@@ -68,11 +115,20 @@ async function processMarkdown(content: string): Promise<string> {
 
 /**
  * Load and process all blog posts from the data/blog directory.
- * Results are cached for subsequent calls.
+ * Uses pre-built cache if available (production), falls back to runtime processing (development).
  */
 async function loadAllPosts(): Promise<BlogPost[]> {
   if (cachedPosts) return cachedPosts
 
+  // Try to load from pre-built cache first (fast path for production)
+  const fromCache = loadFromCache()
+  if (fromCache) {
+    cachedPosts = fromCache
+    return cachedPosts
+  }
+
+  // Fall back to runtime processing (development mode)
+  console.log('No blog cache found, processing markdown at runtime...')
   const blogDir = getBlogDir()
 
   // Check if blog directory exists
