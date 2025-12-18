@@ -338,6 +338,38 @@ createServerFn().handler(...)
 
 The container keeps its background, but individual tokens don't interfere.
 
+### Bug #5: Blog Directory Not Found in Production
+
+**Error**: `Blog directory not found: /var/task/data/blog`
+
+**Cause**: The blog loader used `path.join(process.cwd(), 'data/blog')` to locate markdown files. While this works locally where `process.cwd()` points to the project root, on Vercel serverless functions `process.cwd()` is `/var/task` - and Nitro's build process doesn't include the `data/blog` directory in the deployment bundle.
+
+**Fix**: Two changes were needed:
+1. Add a post-build step in `package.json` to copy the blog directory into the serverless function output
+2. Update `blog-loader.ts` to check both local and Vercel paths
+
+```json
+// package.json
+"build": "vite build && cp -r data/blog .vercel/output/functions/__server.func/"
+```
+
+```typescript
+// blog-loader.ts
+function getBlogDir(): string {
+  // Local dev
+  const cwdPath = path.join(process.cwd(), 'data/blog')
+  if (fs.existsSync(cwdPath)) return cwdPath
+
+  // Vercel serverless
+  const vercelPath = '/var/task/blog'
+  if (fs.existsSync(vercelPath)) return vercelPath
+
+  return cwdPath
+}
+```
+
+This ensures the markdown files are bundled with the serverless function and the loader can find them regardless of the deployment environment.
+
 ---
 
 ## Adding a New Article

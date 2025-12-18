@@ -18,7 +18,26 @@ import {
 } from '../schemas/blog.schema'
 import { calculateReadingTime } from '../utils/reading-time'
 
-const BLOG_DIR = path.join(process.cwd(), 'data/blog')
+/**
+ * Get the blog directory path.
+ * Works in both local dev (process.cwd()) and Vercel deployment.
+ */
+function getBlogDir(): string {
+  // Try process.cwd() first (works in local dev)
+  const cwdPath = path.join(process.cwd(), 'data/blog')
+  if (fs.existsSync(cwdPath)) {
+    return cwdPath
+  }
+
+  // Vercel serverless: blog folder is copied to function root
+  const vercelPath = '/var/task/blog'
+  if (fs.existsSync(vercelPath)) {
+    return vercelPath
+  }
+
+  // Return cwd path for error messaging
+  return cwdPath
+}
 
 let cachedPosts: BlogPost[] | null = null
 
@@ -54,18 +73,20 @@ async function processMarkdown(content: string): Promise<string> {
 async function loadAllPosts(): Promise<BlogPost[]> {
   if (cachedPosts) return cachedPosts
 
+  const blogDir = getBlogDir()
+
   // Check if blog directory exists
-  if (!fs.existsSync(BLOG_DIR)) {
-    console.warn(`Blog directory not found: ${BLOG_DIR}`)
+  if (!fs.existsSync(blogDir)) {
+    console.warn(`Blog directory not found: ${blogDir}`)
     cachedPosts = []
     return cachedPosts
   }
 
-  const files = fs.readdirSync(BLOG_DIR).filter((f) => f.endsWith('.md'))
+  const files = fs.readdirSync(blogDir).filter((f) => f.endsWith('.md'))
   const posts: BlogPost[] = []
 
   for (const file of files) {
-    const filePath = path.join(BLOG_DIR, file)
+    const filePath = path.join(blogDir, file)
     const fileContent = fs.readFileSync(filePath, 'utf-8')
     const { data, content } = matter(fileContent)
 
