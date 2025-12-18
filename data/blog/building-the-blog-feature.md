@@ -166,9 +166,14 @@ app/
 │       └── TagFilter.tsx       # Tag filtering controls
 
 data/
-└── blog/
-    ├── markdown-formatting-guide.md
-    └── getting-started-with-tanstack.md
+├── blog/
+│   ├── markdown-formatting-guide.md
+│   └── getting-started-with-tanstack.md
+└── blog-cache/
+    └── index.json              # Pre-built cache (generated)
+
+scripts/
+└── prebuild-blog.ts            # Build-time markdown processing
 ```
 
 ---
@@ -370,6 +375,43 @@ function getBlogDir(): string {
 
 This ensures the markdown files are bundled with the serverless function and the loader can find them regardless of the deployment environment.
 
+### Bug #6: 10-20 Second Navigation Delay to Blog Page
+
+**Problem**: Clicking the "Blog" link from the home page caused a 10-20 second delay before the page loaded.
+
+**Cause**: Shiki syntax highlighter initialization at runtime. When navigating to `/blog`, the route loader called `serverGetBlogIndex()` which processed all markdown files through `processMarkdown()`. Shiki's first-time initialization loads language grammars and themes - this takes 8-15 seconds on a cold start. The in-memory cache reset on every Vercel cold start, causing repeated slow loads.
+
+**Fix**: Move markdown processing to build time with a prebuild script:
+
+```typescript
+// scripts/prebuild-blog.ts
+// Process all markdown files and output pre-rendered JSON
+async function main() {
+  const posts = await processAllMarkdownFiles()
+  fs.writeFileSync('data/blog-cache/index.json', JSON.stringify({
+    posts,
+    tags: extractTags(posts),
+    generatedAt: new Date().toISOString()
+  }))
+}
+```
+
+Update the blog loader to use the pre-built cache:
+
+```typescript
+// blog-loader.ts
+async function loadAllPosts(): Promise<BlogPost[]> {
+  // Try pre-built cache first (fast path for production)
+  const fromCache = loadFromCache()
+  if (fromCache) return fromCache
+
+  // Fall back to runtime processing (development)
+  return processMarkdownAtRuntime()
+}
+```
+
+The prebuild runs locally before pushing (enforced by a git pre-push hook), and the cache is committed to git. Vercel deploys the pre-rendered JSON directly - no Shiki initialization needed at runtime. Result: blog page loads in <1 second vs 10-20 seconds before.
+
 ---
 
 ## Adding a New Article
@@ -395,7 +437,9 @@ author: "Your Name"  # Optional
 
 3. **Write content** in standard markdown
 
-4. **Commit and push** - the article appears after deployment
+4. **Rebuild the cache**: Run `pnpm prebuild:blog` to regenerate the blog cache
+
+5. **Commit and push** - include both the markdown file and updated `data/blog-cache/index.json`. A pre-push hook automatically verifies the cache is up-to-date.
 
 ### Supported Markdown Features
 
